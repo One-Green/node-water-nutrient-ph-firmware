@@ -37,12 +37,17 @@ void cmdHandler() {
     StaticJsonDocument<200> doc;
 
     if (Serial.available()) {
+        Serial.println("[Serial] Command received");
+        espSerialCmd = Serial.readString();
+    }
+
+    if (espSerial.available()) {
         Serial.println("[espSerial] Command received");
         espSerialCmd = Serial.readString();
     }
 
     if (espSerialCmd == "GET_SENSORS") {
-        Serial.println("[espSerial] cmd=GET_SENSORS received");
+        Serial.println("[Serial/espSerial] cmd=GET_SENSORS received");
 
         doc["waterLevelCM"] = io_handler.getWaterLevelCM();
         doc["nutrientLevelCM"] = io_handler.getNutrientLevelCM();
@@ -51,7 +56,12 @@ void cmdHandler() {
         doc["TDSLevel"] = io_handler.getTDS();
 
         Serial.println("Generated JSON: ");
+        serializeJson(doc, espSerial);
         serializeJson(doc, Serial);
+
+        Serial.println();
+        Serial.println("[Serial/espSerial] JSON serialized on Serial/espSerial");
+
 
     }
 }
