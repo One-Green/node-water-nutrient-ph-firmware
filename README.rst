@@ -23,7 +23,8 @@ Arduino/C++ Library for ESP32 Board:
     - https://github.com/bblanchon/ArduinoJson (Available on Arduino IDE Package manager)
     - https://github.com/knolleary/pubsubclient (Available on Arduino IDE Package manager)
     - https://github.com/plerup/espsoftwareserial (Available on Arduino IDE Package manager)
+    - https://github.com/ivanseidel/ArduinoThread (Available on Arduino IDE Package manager)
 
 Arduino/C++ Library for Mega 2560 Board:
     - https://github.com/bblanchon/ArduinoJson (Available on Arduino IDE Package manager)
-    - https://playground.arduino.cc/Code/TimedAction/ (Available on Arduino IDE Package manager)
+    - https://github.com/ivanseidel/ArduinoThread (Available on Arduino IDE Package manager)
