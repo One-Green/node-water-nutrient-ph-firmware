@@ -18,7 +18,12 @@ Requirements:
     - ESP32 compiler (https://github.com/espressif/arduino-esp32)
 
 
-Arduino/C++ Library:
+Arduino/C++ Library for ESP32 Board:
     - https://github.com/adafruit/Adafruit-ST7735-Library/ (Available on Arduino IDE Package manager)
     - https://github.com/bblanchon/ArduinoJson (Available on Arduino IDE Package manager)
     - https://github.com/knolleary/pubsubclient (Available on Arduino IDE Package manager)
+    - https://github.com/plerup/espsoftwareserial (Available on Arduino IDE Package manager)
+
+Arduino/C++ Library for Mega 2560 Board:
+    - https://github.com/bblanchon/ArduinoJson (Available on Arduino IDE Package manager)
+    - https://playground.arduino.cc/Code/TimedAction/ (Available on Arduino IDE Package manager)
