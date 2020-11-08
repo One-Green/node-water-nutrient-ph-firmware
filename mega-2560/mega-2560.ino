@@ -12,16 +12,39 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
+#include <Thread.h>
 #include "OGIO.h"
+
+int waterLevelCM = 0;
+int nutrientLevelCM = 0;
+int pHDownerLevelCM = 0;
+int phLevel = 0;
+int TDSLevel = 0;
 
 
 SoftwareSerial espSerial(2, 3); // RX, TX
 OGIO io_handler;
+Thread readSensorThread = Thread();
 
 void setup() {
+
     Serial.begin(115200);
     espSerial.begin(115200);
+
     io_handler.initR();
+
+    readSensorThread.onRun(readSensors);
+    readSensorThread.setInterval(500);
+
+}
+
+
+void readSensors() {
+    waterLevelCM = io_handler.getWaterLevelCM();
+    nutrientLevelCM = io_handler.getNutrientLevelCM();
+    pHDownerLevelCM = io_handler.getPhDownerLevelCM();
+    phLevel = io_handler.getPhLevel();
+    TDSLevel = io_handler.getTDS();
 }
 
 void loop() {
@@ -49,11 +72,11 @@ void cmdHandler() {
     if (espSerialCmd == "GET_SENSORS") {
         Serial.println("[Serial/espSerial] cmd=GET_SENSORS received");
 
-        doc["waterLevelCM"] = io_handler.getWaterLevelCM();
-        doc["nutrientLevelCM"] = io_handler.getNutrientLevelCM();
-        doc["pHDownerLevelCM"] = io_handler.getPhDownerLevelCM();
-        doc["phLevel"] = io_handler.getPhLevel();
-        doc["TDSLevel"] = io_handler.getTDS();
+        doc["waterLevelCM"] = waterLevelCM;
+        doc["nutrientLevelCM"] = nutrientLevelCM;
+        doc["pHDownerLevelCM"] = pHDownerLevelCM;
+        doc["phLevel"] = phLevel;
+        doc["TDSLevel"] = TDSLevel;
 
         Serial.println("Generated JSON: ");
         serializeJson(doc, espSerial);
