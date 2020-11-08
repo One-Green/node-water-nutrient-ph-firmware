@@ -17,7 +17,7 @@ int pHDownerLevelEchoPin = 7;
 int pHSense = A0;
 int TdsSensorPin = A1;
 
-void OGIO::initR(){
+void OGIO::initR() {
 
     pinMode(WaterLevelTriggerPin, OUTPUT);
     pinMode(WaterLevelEchoPin, INPUT);
@@ -88,13 +88,15 @@ float OGIO::getTDS() {
         printTimepoint = millis();
         for (copyIndex = 0; copyIndex < SCOUNT; copyIndex++)
             analogBufferTemp[copyIndex] = analogBuffer[copyIndex];
-        averageVoltage = getMedianNum(analogBufferTemp, SCOUNT) * (float) VREF / 1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
-        float compensationCoefficient = 1.0 + 0.02 * (temperature - 25.0); //temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
+        averageVoltage = getMedianNum(analogBufferTemp, SCOUNT) * (float) VREF /
+                         1024.0; // read the analog value more stable by the median filtering algorithm, and convert to voltage value
+        float compensationCoefficient = 1.0 + 0.02 * (temperature -
+                                                      25.0); //temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
         float compensationVolatge = averageVoltage / compensationCoefficient; //temperature compensation
         tdsValue = (
-                    133.42 * compensationVolatge * compensationVolatge * compensationVolatge -
-                    255.86 * compensationVolatge * compensationVolatge + 857.39 * compensationVolatge
-                    ) * 0.5; //convert voltage value to tds value
+                           133.42 * compensationVolatge * compensationVolatge * compensationVolatge -
+                           255.86 * compensationVolatge * compensationVolatge + 857.39 * compensationVolatge
+                   ) * 0.5; //convert voltage value to tds value
 
         return tdsValue;
     }
@@ -151,7 +153,7 @@ int OGIO::getMedianNum(int bArray[], int iFilterLen) {
     return bTemp;
 }
 
-int OGIO::baseUltrasonicReader(int trigger, int echo){
+int OGIO::baseUltrasonicReader(int trigger, int echo) {
     long duration;
     int distance;
     // Clear the trigPin by setting it LOW:
