@@ -20,52 +20,53 @@
  * email: shanmugathas.vigneswaran@outlook.fr
  * */
 
-#define BUFFER_LENGTH 200
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <Wire.h>
 
-void setup(){
+char GET_SENSORS[] = "GET_SENSORS";
+
+const size_t capacity = JSON_OBJECT_SIZE(5) + 200;
+StaticJsonDocument<200> sensorsDict;
+
+void setup() {
     Serial.begin(9600);
-    while(!Serial){} // Waiting for serial connection
-
-    Serial.println();
-    Serial.println("Start I2C scanner ...");
-    Serial.print("\r\n");
-    byte count = 0;
-
     Wire.begin();
-    for (byte i = 8; i < 120; i++)
-    {
-        Wire.beginTransmission(i);
-        if (Wire.endTransmission() == 0)
-        {
-            Serial.print("Found I2C Device: ");
-            Serial.print(" (0x");
-            Serial.print(i, HEX);
-            Serial.println(")");
-            count++;
-            delay(1);
-        }
-    }
-    Serial.print("\r\n");
-    Serial.println("Finish I2C scanner");
-    Serial.print("Found ");
-    Serial.print(count, HEX);
-    Serial.println(" Device(s).");
 }
 
 
 void loop() {
-    SendToMega();
+    getSensors();
     delay(500);
 }
 
 
-
-void SendToMega(){
-    String test = "bonjour tout le monde";
+void getSensors() {
     Wire.beginTransmission(4);
-    Wire.write(test.c_str());
+    Wire.write(GET_SENSORS);
     Wire.endTransmission();
+
+//    TODO: need  Deserialization failed ... need to check response
+//    Wire.requestFrom(8, capacity);
+//    DynamicJsonDocument doc(capacity);
+//
+//    Serial.println("[Wire] Generated JSON: ");
+//    serializeJson(doc, Serial);
+//
+//    DeserializationError err = deserializeJson(doc, Wire);
+//    switch (err.code()) {
+//        case DeserializationError::Ok:
+//            Serial.println(F("Deserialization succeeded"));
+//            serializeJson(doc, Serial);
+//            break;
+//        case DeserializationError::InvalidInput:
+//            Serial.println(F("Invalid input!"));
+//            break;
+//        case DeserializationError::NoMemory:
+//            Serial.println(F("Not enough memory"));
+//            break;
+//        default:
+//            Serial.println(F("Deserialization failed"));
+//            break;
+//    }
 }
