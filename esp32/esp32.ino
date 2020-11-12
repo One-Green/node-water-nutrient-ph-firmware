@@ -20,6 +20,7 @@
  * email: shanmugathas.vigneswaran@outlook.fr
  * */
 
+#define BUFFER_LENGTH 200
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <Wire.h>
@@ -56,10 +57,15 @@ void setup(){
 
 
 void loop() {
+    SendToMega();
+    delay(500);
+}
 
-    String strJSON;
-    StaticJsonDocument<200> doc;
-    Serial.println("[espSerial] Sending cmd=\"GET_SENSORS\"");
-    delay(1000);
 
+
+void SendToMega(){
+    String test = "bonjour tout le monde";
+    Wire.beginTransmission(4);
+    Wire.write(test.c_str());
+    Wire.endTransmission();
 }
