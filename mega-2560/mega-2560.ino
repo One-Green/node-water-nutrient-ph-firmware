@@ -11,31 +11,34 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <ArduinoJson.h>
-#include <Thread.h>
 #include "OGIO.h"
 
-char GET_SENSORS[] = "GET_SENSORS";
-
+const byte SLAVE_ADDRESS = 4;
 int waterLevelCM = 0;
 int nutrientLevelCM = 0;
 int pHDownerLevelCM = 0;
 int phLevel = 0;
 int TDSLevel = 0;
-
-String cmd = ""; // handle command received by ESP32 trough Wire
-StaticJsonDocument<200> sensorsDict;
+char command;
 OGIO io_handler;
+enum {
+    CMD_READ_ID = 1,
+    CMD_READ_WATER_LEVEL = 2,
+    CMD_READ_NUTRIENT_LEVEL = 3,
+    CMD_READ_PH_DOWNER_LEVEL = 4,
+    CMD_READ_PH_LEVEL = 5,
+    CMD_READ_TDS_LEVEL = 6,
+};
 
 void setup() {
-    Wire.begin(4);                  // join i2c bus with address #4
-    Wire.onReceive(receiveEvent);   // register event
-    Wire.onRequest(requestEvent);   //
+    command = 0;
+    Wire.begin(SLAVE_ADDRESS);      // join i2c bus with address #4
+    Wire.onReceive(receiveEvent);  // interrupt handler for incoming messages
+    Wire.onRequest(requestEvent);  // interrupt handler for when data is wanted
     Serial.begin(9600);             // start serial for output
     Serial.println("[Wire] Slave started");  // print slave has started
     io_handler.initR();             // I/O handler
 }
-
 
 void getSensors() {
     /*
@@ -44,45 +47,48 @@ void getSensors() {
      *
      * */
     Serial.println("[Sensors] Updating sensors values ");
-    sensorsDict["waterLevelCM"] = io_handler.getWaterLevelCM();
-    sensorsDict["nutrientLevelCM"] = io_handler.getNutrientLevelCM();
-    sensorsDict["pHDownerLevelCM"] = io_handler.getPhDownerLevelCM();
-    sensorsDict["phLevel"] = io_handler.getPhLevel();
-    sensorsDict["TDSLevel"] = io_handler.getTDS();
-    serializeJson(sensorsDict, Wire);
-    Serial.println("[Sensors] Generated JSON: ");
-    serializeJson(sensorsDict, Serial);
-    Serial.println();
+    waterLevelCM = io_handler.getWaterLevelCM();
+    nutrientLevelCM = io_handler.getNutrientLevelCM();
+    pHDownerLevelCM = io_handler.getPhDownerLevelCM();
+    phLevel = io_handler.getPhLevel();
+    TDSLevel = io_handler.getTDS();
 }
 
 void loop() {
-    delay(100);
+    getSensors();
 }
 
 void receiveEvent(int howMany) {
     /*
-     *  Event listener callback function
+     * Change command type when master change it
+     * */
+    command = Wire.read();
+}
+
+void SendInteger(int val) {
+    /*
+     *  Write integer to master
+     *  int = 2 bytes
      *
      * */
-
-    cmd = ""; // flush last command
-
-    while (Wire.available()) {
-        cmd += (char) Wire.read();
-    }
-    Serial.print("[Wire] Received command : ");
-    Serial.println(cmd);
-
-    if (cmd == GET_SENSORS) {
-        Serial.println("[Wire] Request sensors values detected ...");
-    }
+    byte buf[2];
+    buf[0] = val >> 8;
+    buf[1] = val & 0xFF;
+    Wire.write(buf, 2);
 }
-
 
 void requestEvent() {
-//
-//    if (cmd == GET_SENSORS) {
-//        getSensors();
-//    }
+    /*
+     * Handle command from master
+     *
+     * */
+    switch (command) {
+        case CMD_READ_ID: Wire.write(0x55); break;
+        case CMD_READ_WATER_LEVEL: SendInteger(waterLevelCM); break;
+        case CMD_READ_NUTRIENT_LEVEL: SendInteger(nutrientLevelCM); break;
+        case CMD_READ_PH_DOWNER_LEVEL: SendInteger(pHDownerLevelCM); break;
+        case CMD_READ_PH_LEVEL: SendInteger(phLevel); break;
+        case CMD_READ_TDS_LEVEL: SendInteger(TDSLevel); break;
+        //case CMD_READ_NUTRIENT_LEVEL: Wire.write(digitalRead(8)); break;
+    }
 }
-
