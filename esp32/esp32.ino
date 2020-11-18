@@ -21,52 +21,73 @@
  * */
 
 #include <Arduino.h>
-#include <ArduinoJson.h>
 #include <Wire.h>
 
-char GET_SENSORS[] = "GET_SENSORS";
+int SLAVE_ADDRESS = 4;
+enum {
+    CMD_READ_ID = 1,
+    CMD_READ_WATER_LEVEL = 2,
+    CMD_READ_NUTRIENT_LEVEL = 3,
+    CMD_READ_PH_DOWNER_LEVEL = 4,
+    CMD_READ_PH_LEVEL = 5,
+    CMD_READ_TDS_LEVEL = 6,
+};
 
-const size_t capacity = JSON_OBJECT_SIZE(5) + 200;
-StaticJsonDocument<200> sensorsDict;
+void sendCommand(const byte cmd, const int responseSize) {
+    Wire.beginTransmission(SLAVE_ADDRESS);
+    Wire.write(cmd);
+    Wire.endTransmission();
+    Wire.requestFrom(SLAVE_ADDRESS, responseSize);
+}
 
 void setup() {
-    Serial.begin(9600);
     Wire.begin();
-}
+    Serial.begin(9600);
+    sendCommand(CMD_READ_ID, 1);
+    if (Wire.available()) {
+        Serial.print("Slave is ID: ");
+        Serial.println(Wire.read(), DEC);
+    } else
+        Serial.println("No response to ID request");
 
+}
 
 void loop() {
-    getSensors();
+    int val;
+    sendCommand(CMD_READ_WATER_LEVEL, 2);
+    val = Wire.read();
+    val <<= 8;
+    val |= Wire.read();
+    Serial.print("Water level : ");
+    Serial.println(val, DEC);
+
+    sendCommand(CMD_READ_NUTRIENT_LEVEL, 2);
+    val = Wire.read();
+    val <<= 8;
+    val |= Wire.read();
+    Serial.print("Nutrient level : ");
+    Serial.println(val, DEC);
+
+    sendCommand(CMD_READ_PH_DOWNER_LEVEL, 2);
+    val = Wire.read();
+    val <<= 8;
+    val |= Wire.read();
+    Serial.print("PH downer level : ");
+    Serial.println(val, DEC);
+
+    sendCommand(CMD_READ_PH_LEVEL, 2);
+    val = Wire.read();
+    val <<= 8;
+    val |= Wire.read();
+    Serial.print("PH level : ");
+    Serial.println(val, DEC);
+
+    sendCommand(CMD_READ_TDS_LEVEL, 2);
+    val = Wire.read();
+    val <<= 8;
+    val |= Wire.read();
+    Serial.print("TDS level : ");
+    Serial.println(val, DEC);
+
     delay(500);
-}
-
-
-void getSensors() {
-    Wire.beginTransmission(4);
-    Wire.write(GET_SENSORS);
-    Wire.endTransmission();
-
-//    TODO: need  Deserialization failed ... need to check response
-//    Wire.requestFrom(8, capacity);
-//    DynamicJsonDocument doc(capacity);
-//
-//    Serial.println("[Wire] Generated JSON: ");
-//    serializeJson(doc, Serial);
-//
-//    DeserializationError err = deserializeJson(doc, Wire);
-//    switch (err.code()) {
-//        case DeserializationError::Ok:
-//            Serial.println(F("Deserialization succeeded"));
-//            serializeJson(doc, Serial);
-//            break;
-//        case DeserializationError::InvalidInput:
-//            Serial.println(F("Invalid input!"));
-//            break;
-//        case DeserializationError::NoMemory:
-//            Serial.println(F("Not enough memory"));
-//            break;
-//        default:
-//            Serial.println(F("Deserialization failed"));
-//            break;
-//    }
 }
