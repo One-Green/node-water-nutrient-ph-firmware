@@ -29,5 +29,4 @@ Arduino/C++ Library for Mega 2560 Board:
     - https://github.com/ivanseidel/ArduinoThread (Available on Arduino IDE Package manager)
 
 Special Thanks to:
-    - To https://github.com/nickgammon:
-        - http://www.gammon.com.au/forum/?id=10896 I2C communication tutorial
+    - @nickgammon: http://www.gammon.com.au/forum/?id=10896 I2C communication tutorial
