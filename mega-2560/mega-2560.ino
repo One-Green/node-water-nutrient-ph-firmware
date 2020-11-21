@@ -31,7 +31,7 @@ char CMD_READ_IO[3] = "IO";
 
 void setup() {
     Serial.begin(9600);                   // Debug Serial communication
-    EXSerial.begin(9600);                 // ESP32 Serial communication
+    EXSerial.begin(115200);                 // ESP32 Serial communication
     io_handler.initR();                   // I/O setup digital pin mode
     Serial.println("Serial/ExSerial ok");
 }
@@ -58,6 +58,18 @@ void callBackWriteAlive() {
     Serial.println("[EXSerial] alive sent");
 }
 
+void callBackUnknown() {
+    /*
+     *  Write unknown command
+     *  if command is not detected
+     *  write "ER" to not lock ESP32 while waiting response
+     *
+     * */
+    char _[2] = "ER";
+    EXSerial.write(_, 2);
+    Serial.println("[EXSerial] unknown CMD sent");
+}
+
 void callBackIOJson() {
     /*
      *  Send IO status
@@ -65,11 +77,11 @@ void callBackIOJson() {
      *  TODO: Implement actuator status
      *
      * */
-    doc["water_level_cm"] = io_handler.getWaterLevelCM();
-    doc["nutrient_level_cm"] = io_handler.getNutrientLevelCM();
-    doc["ph_downer_level_cm"] = io_handler.getPhDownerLevelCM();
-    doc["ph_level"] = io_handler.getPhLevel();
-    doc["tds_level"] = io_handler.getTDS();
+    doc["water_level_cm"] = (int) io_handler.getWaterLevelCM();
+    doc["nutrient_level_cm"] = (int) io_handler.getNutrientLevelCM();
+    doc["ph_downer_level_cm"] = (int) io_handler.getPhDownerLevelCM();
+    doc["ph_level"] = (int) io_handler.getPhLevel();
+    doc["tds_level"] = (int) io_handler.getTDS();
     serializeJson(doc, EXSerial);
     Serial.println("[EXSerial] Sensors JSON sent");
     serializeJsonPretty(doc, Serial);
@@ -80,10 +92,9 @@ void loop() {
 
     if (CMD == String(CMD_ALIVE)) {
         callBackWriteAlive();
-    }
-
-    if (CMD == String(CMD_READ_IO)) {
+    } else if (CMD == String(CMD_READ_IO)) {
         callBackIOJson();
-    }
+    } else
+        callBackUnknown();
 
 }
