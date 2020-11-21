@@ -2,93 +2,88 @@
  *  One-Green node type: water+nutrient+pH
  *  Water supplier sprinkler nodes
  *
- *  Inputs / Outputs board, communicate with ESP32 by I2C address = 4
+ *  Inputs / Outputs board, communicate with ESP32 by UART
  *
  *
  * Author: Shanmugathas Vigneswaran
  * email: shanmugathas.vigneswaran@outlook.fr
  * */
 
-#include <Arduino.h>
-#include <Wire.h>
+
+#include <SoftwareSerial.h>
+#include <ArduinoJson.h>
 #include "OGIO.h"
 
-const byte SLAVE_ADDRESS = 4;
-int waterLevelCM = 0;
-int nutrientLevelCM = 0;
-int pHDownerLevelCM = 0;
-int phLevel = 0;
-int TDSLevel = 0;
-char command;
-OGIO io_handler;
-enum {
-    CMD_READ_ID = 1,
-    CMD_READ_WATER_LEVEL = 2,
-    CMD_READ_NUTRIENT_LEVEL = 3,
-    CMD_READ_PH_DOWNER_LEVEL = 4,
-    CMD_READ_PH_LEVEL = 5,
-    CMD_READ_TDS_LEVEL = 6,
-};
+#define RXD10 10
+#define TXD11 11
+
+SoftwareSerial EXSerial(RXD10, TXD11);  // Rx, Tx
+OGIO io_handler;                        // sensors/actuator handler
+
+StaticJsonDocument<200> doc;            // JSON static allocation for IO
+char buffer[10];                        // Serial2/EXSerial buffer
+String CMD;                             // CMD received from ESP32
+
+// ------------------------------------ // Exchange command ESP32-Mega
+char CMD_ALIVE[2] = "A";
+char CMD_READ_IO[3] = "IO";
+// ------------------------------------ // end
 
 void setup() {
-    command = 0;
-    Wire.begin(SLAVE_ADDRESS);      // join i2c bus with address #4
-    Wire.onReceive(receiveEvent);  // interrupt handler for incoming messages
-    Wire.onRequest(requestEvent);  // interrupt handler for when data is wanted
-    Serial.begin(9600);             // start serial for output
-    Serial.println("[Wire] Slave started");  // print slave has started
-    io_handler.initR();             // I/O handler
+    Serial.begin(9600);                   // Debug Serial communication
+    EXSerial.begin(9600);                 // ESP32 Serial communication
+    io_handler.initR();                   // I/O setup digital pin mode
+    Serial.println("Serial/ExSerial ok");
 }
 
-void getSensors() {
+String readCMDFromESP() {
     /*
-     *   Read sensors values and
-     *   create doc JSON key values based
+     *  Read received command from ESP32
      *
      * */
-    Serial.println("[Sensors] Updating sensors values ");
-    waterLevelCM = io_handler.getWaterLevelCM();
-    nutrientLevelCM = io_handler.getNutrientLevelCM();
-    pHDownerLevelCM = io_handler.getPhDownerLevelCM();
-    phLevel = io_handler.getPhLevel();
-    TDSLevel = io_handler.getTDS();
+    if (EXSerial.available() > 0) {
+        EXSerial.readBytes(buffer, 10);
+        Serial.println("[EXSerial] CMD=" + String(buffer));
+    }
+    return String(buffer);
+}
+
+void callBackWriteAlive() {
+    /*
+     *  Write mega is alive
+     *  TODO Implement ESP > MEGA reset if serial disconnected
+     * */
+
+    EXSerial.write(CMD_ALIVE, 2);
+    Serial.println("[EXSerial] alive sent");
+}
+
+void callBackIOJson() {
+    /*
+     *  Send IO status
+     *  sensors and actuator
+     *  TODO: Implement actuator status
+     *
+     * */
+    doc["water_level_cm"] = io_handler.getWaterLevelCM();
+    doc["nutrient_level_cm"] = io_handler.getNutrientLevelCM();
+    doc["ph_downer_level_cm"] = io_handler.getPhDownerLevelCM();
+    doc["ph_level"] = io_handler.getPhLevel();
+    doc["tds_level"] = io_handler.getTDS();
+    serializeJson(doc, EXSerial);
+    Serial.println("[EXSerial] Sensors JSON sent");
+    serializeJsonPretty(doc, Serial);
 }
 
 void loop() {
-    getSensors();
-}
+    CMD = readCMDFromESP();
 
-void receiveEvent(int howMany) {
-    /*
-     * Change command type when master change it
-     * */
-    command = Wire.read();
-}
-
-void SendInteger(int val) {
-    /*
-     *  Write integer to master
-     *  int = 2 bytes
-     *
-     * */
-    byte buf[2];
-    buf[0] = val >> 8;
-    buf[1] = val & 0xFF;
-    Wire.write(buf, 2);
-}
-
-void requestEvent() {
-    /*
-     * Handle command from master
-     *
-     * */
-    switch (command) {
-        case CMD_READ_ID: Wire.write(0x55); break;
-        case CMD_READ_WATER_LEVEL: SendInteger(waterLevelCM); break;
-        case CMD_READ_NUTRIENT_LEVEL: SendInteger(nutrientLevelCM); break;
-        case CMD_READ_PH_DOWNER_LEVEL: SendInteger(pHDownerLevelCM); break;
-        case CMD_READ_PH_LEVEL: SendInteger(phLevel); break;
-        case CMD_READ_TDS_LEVEL: SendInteger(TDSLevel); break;
-        //case CMD_READ_NUTRIENT_LEVEL: Wire.write(digitalRead(8)); break;
+    if (CMD == String(CMD_ALIVE)) {
+        callBackWriteAlive();
     }
+
+    if (CMD == String(CMD_READ_IO)) {
+        callBackIOJson();
+    }
+
 }
