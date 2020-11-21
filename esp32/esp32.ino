@@ -37,7 +37,7 @@ char CMD_READ_IO[3] = "IO";
 
 void setup() {
     Serial.begin(9600);
-    Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+    Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
     Serial.println("Serial/Serial2 ok");
 }
 
@@ -61,6 +61,7 @@ bool checkMegaAlive() {
      *
      * */
     Serial2.write(CMD_ALIVE, 2);
+    delay(20);
     waitMega();
     Serial2.readBytes(buffer, 10);
     // Serial.println("[Serial2] alive=" + String(buffer));
@@ -77,6 +78,7 @@ void readMegaIO() {
      *
      * */
     Serial2.write(CMD_READ_IO, 3);
+    delay(20)
     waitMega();
     Serial.print("[Serial2] Datas received : ");
     deserializeJson(doc, Serial2);
