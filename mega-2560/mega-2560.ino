@@ -27,6 +27,19 @@ String CMD;                             // CMD received from ESP32
 // ------------------------------------ // Exchange command ESP32-Mega
 char CMD_ALIVE[2] = "A";
 char CMD_READ_IO[3] = "IO";
+
+char CMD_ON_WATER_PUMP[3] = "H1";
+char CMD_OFF_WATER_PUMP[3] = "L1";
+
+char CMD_ON_NUTRIENT_PUMP[3] = "H2";
+char CMD_OFF_NUTRIENT_PUMP[3] = "L2";
+
+char CMD_ON_PH_DOWNER_PUMP[3] = "H2";
+char CMD_OFF_PH_DOWNER_PUMP[3] = "L2";
+
+char CMD_ON_MIXER_PUMP[3] = "H3";
+char CMD_OFF_MIXER_PUMP[3] = "L3";
+
 // ------------------------------------ // end
 
 void setup() {
@@ -82,6 +95,12 @@ void callBackIOJson() {
     doc["ph_downer_level_cm"] = (int) io_handler.getPhDownerLevelCM();
     doc["ph_level"] = (int) io_handler.getPhLevel();
     doc["tds_level"] = (int) io_handler.getTDS();
+
+    doc["water_pump_state"] = io_handler.getWaterPumpStatus();
+    doc["nutrient_pump_state"] = io_handler.getNutrientPumpStatus();
+    doc["ph_downer_pump_state"] = io_handler.getPhDownerPumpStatus();
+    doc["mixer_pump_state"] = io_handler.getMixerPumpStatus();
+
     serializeJson(doc, EXSerial);
     Serial.println("[EXSerial] Sensors JSON sent");
     serializeJsonPretty(doc, Serial);
@@ -90,11 +109,23 @@ void callBackIOJson() {
 void loop() {
     CMD = readCMDFromESP();
 
-    if (CMD == String(CMD_ALIVE)) {
-        callBackWriteAlive();
-    } else if (CMD == String(CMD_READ_IO)) {
-        callBackIOJson();
-    } else
+    if (CMD == String(CMD_ALIVE)) { callBackWriteAlive(); }
+
+    else if (CMD == String(CMD_READ_IO)) { callBackIOJson(); }
+
+    else if (CMD == String(CMD_ON_WATER_PUMP)) { io_handler.onWaterPump(); }
+    else if (CMD == String(CMD_OFF_WATER_PUMP)) { io_handler.offWaterPump(); }
+
+    else if (CMD == String(CMD_ON_NUTRIENT_PUMP)) { io_handler.onNutrientPump(); }
+    else if (CMD == String(CMD_OFF_NUTRIENT_PUMP)) { io_handler.offNutrientPump(); }
+
+    else if (CMD == String(CMD_ON_PH_DOWNER_PUMP)) { io_handler.onPhDownerPump(); }
+    else if (CMD == String(CMD_OFF_PH_DOWNER_PUMP)) { io_handler.offPhDownerPump(); }
+
+    else if (CMD == String(CMD_ON_MIXER_PUMP)) { io_handler.onMixerPump(); }
+    else if (CMD == String(CMD_OFF_MIXER_PUMP)) { io_handler.offMixerPump(); }
+
+    else
         callBackUnknown();
 
 }

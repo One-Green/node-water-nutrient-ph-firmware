@@ -23,6 +23,13 @@ public:
     void offNutrientPump();
     void onPhDownerPump();
     void offPhDownerPump();
+    void onMixerPump();
+    void offMixerPump();
+
+    int getWaterPumpStatus();
+    int getNutrientPumpStatus();
+    int getPhDownerPumpStatus();
+    int getMixerPumpStatus();
 
     int getMedianNum(int bArray[], int iFilterLen);
     int baseUltrasonicReader(int trigger, int echo);

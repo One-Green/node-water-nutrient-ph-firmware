@@ -5,6 +5,7 @@
 #include "Arduino.h"
 #include "OGIO.h"
 
+// ----------------------------  // Sensors
 int WaterLevelTriggerPin = 2;
 int WaterLevelEchoPin = 3;
 
@@ -15,7 +16,14 @@ int pHDownerLevelTriggerPin = 6;
 int pHDownerLevelEchoPin = 7;
 
 int pHSense = A0;
-int TdsSensorPin = A1;
+int tdsSensorPin = A1;
+
+// ----------------------------  // Actuators
+
+int WaterPumpPin = 22;
+int NutrientPumpPin = 23;
+int phDownerPumpPin = 24;
+int MixerPumpPin = 25;
 
 void OGIO::initR() {
 
@@ -27,6 +35,11 @@ void OGIO::initR() {
 
     pinMode(pHDownerLevelTriggerPin, OUTPUT);
     pinMode(pHDownerLevelEchoPin, INPUT);
+
+    pinMode(WaterPumpPin, OUTPUT);
+    pinMode(NutrientPumpPin, OUTPUT);
+    pinMode(phDownerPumpPin, OUTPUT);
+    pinMode(MixerPumpPin, OUTPUT);
 
 }
 
@@ -78,7 +91,7 @@ float OGIO::getTDS() {
     if (millis() - analogSampleTimepoint > 40U) //every 40 milliseconds,read the analog value from the ADC
     {
         analogSampleTimepoint = millis();
-        analogBuffer[analogBufferIndex] = analogRead(TdsSensorPin); //read the analog value and store into the buffer
+        analogBuffer[analogBufferIndex] = analogRead(tdsSensorPin); //read the analog value and store into the buffer
         analogBufferIndex++;
         if (analogBufferIndex == SCOUNT)
             analogBufferIndex = 0;
@@ -103,29 +116,53 @@ float OGIO::getTDS() {
 }
 
 void OGIO::onWaterPump() {
-
+    digitalWrite(WaterPumpPin, HIGH);
 }
 
 void OGIO::offWaterPump() {
-
+    digitalWrite(WaterPumpPin, LOW);
 }
 
 void OGIO::onNutrientPump() {
-
+    digitalWrite(NutrientPumpPin, HIGH);
 }
 
 void OGIO::offNutrientPump() {
-
+    digitalWrite(NutrientPumpPin, LOW);
 }
 
 void OGIO::onPhDownerPump() {
-
+    digitalWrite(phDownerPumpPin, HIGH);
 }
 
 void OGIO::offPhDownerPump() {
-
+    digitalWrite(phDownerPumpPin, LOW);
 }
 
+
+void OGIO::onMixerPump() {
+    digitalWrite(MixerPumpPin, HIGH);
+}
+
+void OGIO::offMixerPump() {
+    digitalWrite(MixerPumpPin, LOW);
+}
+
+int OGIO::getWaterPumpStatus(){
+    return digitalRead(WaterPumpPin);
+}
+
+int OGIO::getNutrientPumpStatus(){
+    return digitalRead(NutrientPumpPin);
+}
+
+int OGIO::getPhDownerPumpStatus(){
+    return digitalRead(phDownerPumpPin);
+}
+
+int OGIO::getMixerPumpStatus(){
+    return digitalRead(MixerPumpPin);
+}
 
 int OGIO::getMedianNum(int bArray[], int iFilterLen) {
     /*
