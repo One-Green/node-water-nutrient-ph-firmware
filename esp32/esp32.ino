@@ -30,7 +30,17 @@
 
 StaticJsonDocument<200> doc;
 char buffer[10];                        // Serial2/EXSerial buffer
-
+// ----------------------------------   // Sensors
+int water_level_cm;
+int nutrient_level_cm;
+int ph_downer_level_cm;
+int ph_level;
+int ph_level;
+// ----------------------------------   // Actuator
+bool water_pump_state;
+bool nutrient_pump_state;
+bool ph_downer_pump_state;
+bool mixer_pump_state;
 // ------------------------------------ // Exchange command ESP32-Mega
 char CMD_ALIVE[2] = "A";
 char CMD_READ_IO[3] = "IO";
@@ -81,8 +91,24 @@ void readMegaIO() {
     delay(20)
     waitMega();
     Serial.print("[Serial2] Datas received : ");
-    deserializeJson(doc, Serial2);
+    DeserializationError error = deserializeJson(doc, Serial2);
     serializeJsonPretty(doc, Serial);
+    if (error) {
+        Serial.print(F("[Serial2] deserializeJson() failed: "));
+        Serial.println(error.f_str());
+        return;
+    }
+    else:
+        water_level_cm = doc["water_level_cm"];
+        nutrient_level_cm = doc["nutrient_level_cm"];
+        ph_downer_level_cm = doc["ph_downer_level_cm"];
+        ph_level = doc["ph_level"];
+        ph_level = doc["ph_level"];
+        water_pump_state = doc["water_pump_state"];
+        nutrient_pump_state = doc["nutrient_pump_state"];
+        ph_downer_pump_state = doc["ph_downer_pump_state"];
+        mixer_pump_state = doc["mixer_pump_state"];
+
 }
 
 void loop() {
