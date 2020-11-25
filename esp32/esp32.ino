@@ -45,6 +45,18 @@ bool mixer_pump_state;
 char CMD_ALIVE[2] = "A";
 char CMD_READ_IO[3] = "IO";
 
+char CMD_ON_WATER_PUMP[3] = "H1";
+char CMD_OFF_WATER_PUMP[3] = "L1";
+
+char CMD_ON_NUTRIENT_PUMP[3] = "H2";
+char CMD_OFF_NUTRIENT_PUMP[3] = "L2";
+
+char CMD_ON_PH_DOWNER_PUMP[3] = "H2";
+char CMD_OFF_PH_DOWNER_PUMP[3] = "L2";
+
+char CMD_ON_MIXER_PUMP[3] = "H3";
+char CMD_OFF_MIXER_PUMP[3] = "L3";
+
 void setup() {
     Serial.begin(9600);
     Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
