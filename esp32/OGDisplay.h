@@ -35,8 +35,6 @@ public:
 					float configMin, float configMax ,
 					bool water_valve_signal);
 
-	void printRegistryError();
-
 	void uptime();
 
 

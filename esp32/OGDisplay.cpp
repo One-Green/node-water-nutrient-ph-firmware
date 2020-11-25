@@ -126,22 +126,6 @@ void DisplayLib::drawtext(char *text, uint16_t color) {
 	tft.print(text);
 }
 
-
-void DisplayLib::printRegistryError() {
-	String message = "Not registered, "
-	                 "tag is already in database, "
-	                 "to bypass change variable  CHECK_NODE_TAG_DUPLICATE to false";
-	tft.fillRect(0, 50, 128, 160, ST7735_RED);
-	tft.setCursor(0, 50);
-	tft.print(message);
-	delay(500);
-	tft.fillRect(0, 50, 128, 160, ST7735_YELLOW);
-	tft.setCursor(0, 50);
-	tft.print(message);
-	delay(500);
-}
-
-
 String DisplayLib::ip2Str(IPAddress ip) {
 	// took from https://gist.github.com/loosak/76019faaefd5409fca67
 	String s = "";
