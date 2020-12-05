@@ -80,7 +80,7 @@ void callBackUnknown() {
      * */
     char _[2] = "ER";
     EXSerial.write(_, 2);
-    Serial.println("[EXSerial] unknown CMD sent");
+    Serial.println("[EXSerial] unknown CMD received from ESP32");
 }
 
 void callBackIOJson() {
