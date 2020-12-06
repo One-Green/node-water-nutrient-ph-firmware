@@ -31,9 +31,11 @@ public:
 
 	void printTemplate();
 
-	void updateDisplay(float moistureLevelADC, float moistureLevel,
-					float configMin, float configMax ,
-					bool water_valve_signal);
+	void updateDisplay( int water_level_cm, int nutrient_level_cm, int ph_downer_level_cm,
+            int ph_level, int tds_level,
+            bool water_pump_state, bool nutrient_pump_state, bool ph_downer_pump_state,
+            bool mixer_pump_state
+    );
 
 	void uptime();
 

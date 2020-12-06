@@ -73,49 +73,91 @@ void DisplayLib::printHeader(
 
 
 void DisplayLib::printTemplate() {
-	// print node tag
+	/*
+	 *  Print static on ST7735
+	 *
+	 * */
 	tft.setCursor(2, 50);
-	tft.print("Moisture (Raw): ");
+	tft.print("Water tk (cm): ");
 	tft.setCursor(2, 60);
-	tft.print("Moisture (%)  : ");
+	tft.print("Nutr. tk (cm): ");
 	tft.setCursor(2, 70);
-	tft.print("Config Min (%): ");
+	tft.print("pH tk (cm): ");
 	tft.setCursor(2, 80);
-	tft.print("Config Max (%): ");
+	tft.print("pH: ");
 	tft.setCursor(2, 90);
-	tft.print("Valve status  : ");
+	tft.print("TDS: ");
+    tft.setCursor(2, 100);
+    tft.print("Water p: ");
+    tft.setCursor(2, 110);
+    tft.print("Nutr. p: ");
+    tft.setCursor(2, 120);
+    tft.print("ph down p: ");
+    tft.setCursor(2, 130);
+    tft.print("Mixer p: ");
 }
 
 
 void DisplayLib::updateDisplay(
-		float moistureLevelADC,
-		float moistureLevel,
-		float configMin,
-		float configMax,
-		bool water_valve_signal){
+        int water_level_cm,
+        int nutrient_level_cm,
+        int ph_downer_level_cm,
+        int ph_level,
+        int tds_level,
+        bool water_pump_state,
+        bool nutrient_pump_state,
+        bool ph_downer_pump_state,
+        bool mixer_pump_state){
 
 	tft.fillRect(90, 50, 128, 50, ST7735_GREEN);
 
 	tft.setCursor(95, 50);
-	tft.print((int) moistureLevelADC);
+	tft.print((int) water_level_cm);
 
 	tft.setCursor(95, 60);
-	tft.print((int) moistureLevel);
+	tft.print((int) nutrient_level_cm);
 
 	tft.setCursor(95, 70);
-	tft.print((int) configMin);
+	tft.print((int) ph_downer_level_cm);
 
 	tft.setCursor(95, 80);
-	tft.print((int) configMax);
+	tft.print((int) ph_level);
 
-	tft.setCursor(95, 90);
-	if (water_valve_signal){
+    tft.setCursor(95, 90);
+    tft.print((int) tds_level);
+
+    // PRINT RELAY STATUS
+	tft.setCursor(95, 100);
+	if (water_pump_state){
 		tft.print("OPEN");
 	}
 	else{
 		tft.print("CLOSE");
 	}
 
+    tft.setCursor(95, 110);
+    if (nutrient_pump_state){
+        tft.print("OPEN");
+    }
+    else{
+        tft.print("CLOSE");
+    }
+
+    tft.setCursor(95, 120);
+    if (ph_downer_pump_state){
+        tft.print("OPEN");
+    }
+    else{
+        tft.print("CLOSE");
+    }
+
+    tft.setCursor(95, 130);
+    if (mixer_pump_state){
+        tft.print("OPEN");
+    }
+    else{
+        tft.print("CLOSE");
+    }
 }
 
 void DisplayLib::drawtext(char *text, uint16_t color) {
