@@ -31,7 +31,7 @@
 
 // -----------------------------------  // MQTT parameters
 char *NODE_TYPE = "water";
-char *NODE_TAG = ":-)";                 // not required for node type = water
+char *NODE_TAG = "water";                 // not required for node type = water
 char *WIFI_SSID = "*";
 char *WIFI_PASSWORD = "*";
 
@@ -169,7 +169,7 @@ bool readMegaIO() {
         nutrient_level_cm = doc["nutrient_level_cm"];
         ph_downer_level_cm = doc["ph_downer_level_cm"];
         ph_level = doc["ph_level"];
-        tds_level = doc["ph_level"];
+        tds_level = doc["tds_level"];
         water_pump_state = doc["water_pump_state"];
         nutrient_pump_state = doc["nutrient_pump_state"];
         ph_downer_pump_state = doc["ph_downer_pump_state"];
@@ -241,7 +241,7 @@ String generateInfluxLineProtocol() {
             + " nutrient_level_cm=" + String(nutrient_level_cm) + "i,"
             + " ph_downer_level_cm=" + String(ph_downer_level_cm) + "i,"
             + " ph_level=" + String(ph_level) + "i,"
-            + " tds_level=" + String(tds_level) + "i" ;
+            + " tds_level=" + String(tds_level) + "i";
 
     return lineProtoStr;
 }
@@ -249,10 +249,10 @@ String generateInfluxLineProtocol() {
 
 void loop() {
     // reconnect MQTT Client if not connected
-    if (!client.connected()) {
-        reconnect_mqtt();
-    }
-    client.loop();
+    //if (!client.connected()) {
+    //    reconnect_mqtt();
+    //}
+    //client.loop();
 
 
     if (readMegaIO()) {
@@ -263,5 +263,12 @@ void loop() {
         char line_proto_char[line_proto_len];
         line_proto.toCharArray(line_proto_char, line_proto_len);
         client.publish(SENSOR_TOPIC, line_proto_char);
+
+        displayLib.updateDisplay(water_level_cm, nutrient_level_cm, ph_downer_level_cm,
+                                 ph_level, tds_level, water_pump_state, nutrient_pump_state, ph_downer_pump_state,
+                                 mixer_pump_state
+        );
+
     };
+    delay(2000);
 }
