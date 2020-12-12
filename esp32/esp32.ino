@@ -36,8 +36,10 @@ char *WIFI_SSID = "*";
 char *WIFI_PASSWORD = "*";
 
 // -----------------------------------  // MQTT parameters
-char *MQTT_SERVER = "af120153-db6a-4fdd-a81b-6d902b00e936.nodes.k8s.fr-par.scw.cloud";
-int MQTT_PORT = 32500;
+char *MQTT_SERVER = "010e7d5e-3a86-4c87-a4bc-8d7a82bf5d2e.nodes.k8s.fr-par.scw.cloud";
+char *MQTT_USER = "admin";
+char *MQTT_PASSWORD = "admin";
+int MQTT_PORT = 30180;
 char *SENSOR_TOPIC = "water/sensor";
 char *SENSOR_CONTROLLER = "water/controller";
 // Parameter from Master, provided by MQTT JSON
@@ -190,7 +192,7 @@ void reconnect_mqtt() {
         Serial.println(clt_name_char);
 
         // Attempt to connect
-        if (client.connect(clt_name_char)) {
+        if (client.connect(clt_name_char, MQTT_USER, MQTT_PASSWORD)) {
             Serial.println("[MQTT] Client connected");
             // Subscribe
             client.subscribe(SENSOR_CONTROLLER);
@@ -249,10 +251,10 @@ String generateInfluxLineProtocol() {
 
 void loop() {
     // reconnect MQTT Client if not connected
-    //if (!client.connected()) {
-    //    reconnect_mqtt();
-    //}
-    //client.loop();
+    if (!client.connected()) {
+        reconnect_mqtt();
+    }
+    client.loop();
 
 
     if (readMegaIO()) {
