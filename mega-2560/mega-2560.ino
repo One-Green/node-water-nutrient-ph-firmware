@@ -44,7 +44,7 @@ char CMD_OFF_MIXER_PUMP[3] = "L3";
 
 void setup() {
     Serial.begin(9600);                   // Debug Serial communication
-    EXSerial.begin(115200);                 // ESP32 Serial communication
+    EXSerial.begin(4800);                 // ESP32 Serial communication
     io_handler.initR();                   // I/O setup digital pin mode
     Serial.println("Serial/ExSerial ok");
 }
@@ -59,6 +59,16 @@ String readCMDFromESP() {
         Serial.println("[EXSerial] CMD=" + String(buffer));
     }
     return String(buffer);
+}
+
+void writeIntegerEXSerial(int intValue ){
+
+    int data [2];
+    data[0] = intValue & 0xFF;
+    data[1] = (intValue >> 8);
+    EXSerial.write(data[0]);
+    EXSerial.write(data[1]);
+    delay(50);
 }
 
 void callBackWriteAlive() {
@@ -90,20 +100,26 @@ void callBackIOJson() {
      *  TODO: Implement actuator status
      *
      * */
-    doc["water_level_cm"] = (int) io_handler.getWaterLevelCM();
-    doc["nutrient_level_cm"] = (int) io_handler.getNutrientLevelCM();
-    doc["ph_downer_level_cm"] = (int) io_handler.getPhDownerLevelCM();
-    doc["ph_level"] = (int) io_handler.getPhLevel();
-    doc["tds_level"] = (int) io_handler.getTDS();
+    //writeIntegerEXSerial(io_handler.getWaterLevelCM());
+    int val1 = 2562;
+    writeIntegerEXSerial(val1);
+    while (EXSerial.available() > 0)
+            EXSerial.read();
 
-    doc["water_pump_state"] = io_handler.getWaterPumpStatus();
-    doc["nutrient_pump_state"] = io_handler.getNutrientPumpStatus();
-    doc["ph_downer_pump_state"] = io_handler.getPhDownerPumpStatus();
-    doc["mixer_pump_state"] = io_handler.getMixerPumpStatus();
+//    doc["water_level_cm"] =  io_handler.getWaterLevelCM();
+//    doc["nutrient_level_cm"] =  io_handler.getNutrientLevelCM();
+//    doc["ph_downer_level_cm"] =  io_handler.getPhDownerLevelCM();
+//    doc["ph_level"] = io_handler.getPhLevel();
+//    doc["tds_level"] = io_handler.getTDS();
+//
+//    doc["water_pump_state"] = io_handler.getWaterPumpStatus();
+//    doc["nutrient_pump_state"] = io_handler.getNutrientPumpStatus();
+//    doc["ph_downer_pump_state"] = io_handler.getPhDownerPumpStatus();
+//    doc["mixer_pump_state"] = io_handler.getMixerPumpStatus();
 
-    serializeJson(doc, EXSerial);
-    Serial.println("[EXSerial] Sensors JSON sent");
-    serializeJsonPretty(doc, Serial);
+//    serializeJson(doc, EXSerial);
+//    Serial.println("[EXSerial] Sensors JSON sent");
+//    serializeJsonPretty(doc, Serial);
 }
 
 void loop() {
@@ -128,4 +144,5 @@ void loop() {
     else
         callBackUnknown();
 
+    EXSerial.flush();
 }

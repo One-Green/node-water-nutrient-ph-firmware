@@ -29,9 +29,11 @@
 #include <PubSubClient.h>
 #include "OGDisplay.h"
 
-// -----------------------------------  // MQTT parameters
+// -----------------------------------  // Node parameters
 char *NODE_TYPE = "water";
 char *NODE_TAG = "water";                 // not required for node type = water
+
+// -----------------------------------  // Wifi parameters
 char *WIFI_SSID = "*";
 char *WIFI_PASSWORD = "*";
 
@@ -55,7 +57,6 @@ int ctl_tds_level_max;
 // ----------------------------------   // Communication ESP32 - MEGA 2560
 #define RXD2 16
 #define TXD2 17
-StaticJsonDocument<200> doc;            // Json
 char buffer[10];                        // Serial2/EXSerial buffer
 
 // ----------------------------------   // Sensors
@@ -95,7 +96,7 @@ DisplayLib displayLib;
 
 void setup() {
     Serial.begin(9600);
-    Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
+    Serial2.begin(4800, SERIAL_8N1, RXD2, TXD2);
     Serial.println("Serial/Serial2 ok");
 
     displayLib.initR();
@@ -156,28 +157,44 @@ bool readMegaIO() {
      *  buffer > JSON handled by ArduinoJson
      *  return true if successfully read
      * */
+
+    int coolVal;
     Serial2.write(CMD_READ_IO, 3);
     delay(20);
     waitMega();
-    Serial.print("[Serial2] Datas received : ");
-    DeserializationError error = deserializeJson(doc, Serial2);
-    serializeJsonPretty(doc, Serial);
-    if (error) {
-        Serial.print(F("[Serial2] deserializeJson() failed: "));
-        Serial.println(error.f_str());
-        return false;
-    } else {
-        water_level_cm = doc["water_level_cm"];
-        nutrient_level_cm = doc["nutrient_level_cm"];
-        ph_downer_level_cm = doc["ph_downer_level_cm"];
-        ph_level = doc["ph_level"];
-        tds_level = doc["tds_level"];
-        water_pump_state = doc["water_pump_state"];
-        nutrient_pump_state = doc["nutrient_pump_state"];
-        ph_downer_pump_state = doc["ph_downer_pump_state"];
-        mixer_pump_state = doc["mixer_pump_state"];
-        return true;
-    }
+    buffer[0] = Serial2.read();
+    buffer[1] = Serial2.read();
+    coolVal = buffer[1] << 8 | buffer[0];
+
+    // flush receiving bytes
+    while (Serial2.available() > 0)
+        Serial2.read();
+
+    delay(10);
+    Serial.print("value received from MEGA:");
+    Serial.println(coolVal);
+//    DeserializationError error = deserializeJson(doc, Serial2);
+//    if (error) {
+//        Serial.print(F("[Serial2] deserializeJson() failed: "));
+//        Serial.println(error.f_str());
+//        while (Serial2.available() > 0)
+//            Serial2.read();
+//        return false;
+//    } else {
+//        Serial.print("[Serial2] Data received : ");
+//        serializeJsonPretty(doc, Serial);
+//        water_level_cm = doc["water_level_cm"];
+//        nutrient_level_cm = doc["nutrient_level_cm"];
+//        ph_downer_level_cm = doc["ph_downer_level_cm"];
+//        ph_level = doc["ph_level"];
+//        tds_level = doc["tds_level"];
+//        water_pump_state = doc["water_pump_state"];
+//        nutrient_pump_state = doc["nutrient_pump_state"];
+//        ph_downer_pump_state = doc["ph_downer_pump_state"];
+//        mixer_pump_state = doc["mixer_pump_state"];
+    return true;
+    //}
+
 }
 
 
@@ -208,19 +225,24 @@ void reconnect_mqtt() {
 
 
 void mqttCallback(char *topic, byte *message, unsigned int length) {
+    /*
+     * Read JSON from controller through MQTT
+     * and parse to Arduino datatype
+     *
+     * */
     Serial.print("[MQTT] Receiving << on topic: ");
     Serial.print(topic);
     Serial.print(". JSON message: ");
-    String messageTemp;
+    String tmpMessage;
 
     for (int i = 0; i < length; i++) {
         Serial.print((char) message[i]);
-        messageTemp += (char) message[i];
+        tmpMessage += (char) message[i];
     }
     Serial.println();
 
     DynamicJsonDocument doc(1024);
-    deserializeJson(doc, messageTemp);
+    deserializeJson(doc, tmpMessage);
     JsonObject obj = doc.as<JsonObject>();
 
     ctl_water_pump = obj[String("ctl_water_pump")];
@@ -237,6 +259,9 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
 }
 
 String generateInfluxLineProtocol() {
+    /*
+     * Format sensors values for InfluxDB/Line protocol
+     * */
     String lineProtoStr =
             "water,tag=" + String(NODE_TAG)
             + " water_level_cm=" + String(water_level_cm) + "i,"
@@ -251,25 +276,25 @@ String generateInfluxLineProtocol() {
 
 void loop() {
     // reconnect MQTT Client if not connected
-    if (!client.connected()) {
-        reconnect_mqtt();
-    }
-    client.loop();
+    // if (!client.connected()) {
+    //    reconnect_mqtt();
+    // }
+    // client.loop();
 
 
     if (readMegaIO()) {
-        String line_proto = generateInfluxLineProtocol();
-        Serial.println(line_proto);
+        //String line_proto = generateInfluxLineProtocol();
+        //Serial.println(line_proto);
         // convert string to char and publish to mqtt
-        int line_proto_len = line_proto.length() + 1;
-        char line_proto_char[line_proto_len];
-        line_proto.toCharArray(line_proto_char, line_proto_len);
-        client.publish(SENSOR_TOPIC, line_proto_char);
+        //int line_proto_len = line_proto.length() + 1;
+        //char line_proto_char[line_proto_len];
+        //line_proto.toCharArray(line_proto_char, line_proto_len);
+        //client.publish(SENSOR_TOPIC, line_proto_char);
 
-        displayLib.updateDisplay(water_level_cm, nutrient_level_cm, ph_downer_level_cm,
-                                 ph_level, tds_level, water_pump_state, nutrient_pump_state, ph_downer_pump_state,
-                                 mixer_pump_state
-        );
+        //displayLib.updateDisplay(water_level_cm, nutrient_level_cm, ph_downer_level_cm,
+        //                         ph_level, tds_level, water_pump_state, nutrient_pump_state, ph_downer_pump_state,
+        //                         mixer_pump_state
+        //);
 
     };
     delay(2000);
