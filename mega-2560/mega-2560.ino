@@ -19,7 +19,7 @@
 SoftwareSerial EXSerial(RXD10, TXD11);  // Rx, Tx
 OGIO io_handler;                        // sensors/actuator handler
 
-char buffer[10];                        // Serial2/EXSerial buffer
+char buffer[10];                        // EXSerial/EXSerial buffer
 String CMD;                             // CMD received from ESP32
 
 // ------------------------------------ // Exchange command ESP32-Mega
@@ -114,37 +114,91 @@ void flushEXSerial() {
 
 void loop() {
 
+    int sensor_value;
+    bool actuator_state;
+
     CMD = readCMDFromESP();
 
-    if (CMD == String(CMD_ALIVE)) { callBackWriteAlive(); }
+    if (CMD == String(CMD_ALIVE)) {
+        callBackWriteAlive();
+    }
+
         // Sensors callbacks
-    else if (CMD == String(CMD_GET_WATER_LEVEL)) { writeIntegerEXSerial(io_handler.getWaterLevelCM()); }
-    else if (CMD == String(CMD_GET_NUTRIENT_LEVEL)) { writeIntegerEXSerial(io_handler.getNutrientLevelCM()); }
-    else if (CMD == String(CMD_GET_PH_DOWNER_LEVEL)) { writeIntegerEXSerial(io_handler.getPhDownerLevelCM()); }
-    else if (CMD == String(CMD_GET_TDS)) { writeIntegerEXSerial(io_handler.getPhLevel()); }
-    else if (CMD == String(CMD_GET_PH)) { writeIntegerEXSerial(io_handler.getTDS()); }
+    else if (CMD == String(CMD_GET_WATER_LEVEL)) {
+        sensor_value = io_handler.getWaterLevelCM();
+        writeIntegerEXSerial(sensor_value);
+        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", water level=" + sensor_value);
+
+    } else if (CMD == String(CMD_GET_NUTRIENT_LEVEL)) {
+        sensor_value = io_handler.getNutrientLevelCM();
+        writeIntegerEXSerial(sensor_value);
+        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", nutrient level=" + sensor_value);
+
+    } else if (CMD == String(CMD_GET_PH_DOWNER_LEVEL)) {
+        sensor_value = io_handler.getPhDownerLevelCM();
+        writeIntegerEXSerial(sensor_value);
+        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", ph downer level=" + sensor_value);
+
+    } else if (CMD == String(CMD_GET_TDS)) {
+        sensor_value = io_handler.getPhLevel();
+        writeIntegerEXSerial(sensor_value);
+        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", tds=" + sensor_value);
+
+    } else if (CMD == String(CMD_GET_PH)) {
+        sensor_value = io_handler.getTDS();
+        writeIntegerEXSerial(sensor_value);
+        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", pH=" + sensor_value);
+    }
 
         // Actuator status callback
-    else if (CMD == String(CMD_GET_WATER_PUMP_STATE)) { writeBoolEXSerial(io_handler.getWaterLevelCM()); }
-    else if (CMD == String(CMD_GET_NUTRIENT_PUMP_STATE)) { writeBoolEXSerial(io_handler.getWaterLevelCM()); }
-    else if (CMD == String(CMD_GET_PH_DOWNER_PUMP_STATE)) { writeBoolEXSerial(io_handler.getWaterLevelCM()); }
-    else if (CMD == String(CMD_GET_MIXER_PUMP_STATE)) { writeBoolEXSerial(io_handler.getWaterLevelCM()); }
+    else if (CMD == String(CMD_GET_WATER_PUMP_STATE)) {
+        actuator_state = (bool) io_handler.getWaterPumpStatus();
+        writeBoolEXSerial(actuator_state);
+        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", water pump=" + String(actuator_state));
+
+    } else if (CMD == String(CMD_GET_NUTRIENT_PUMP_STATE)) {
+        actuator_state = (bool) io_handler.getNutrientPumpStatus();
+        writeBoolEXSerial(actuator_state);
+        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", nutrient pump=" + String(actuator_state));
+
+    } else if (CMD == String(CMD_GET_PH_DOWNER_PUMP_STATE)) {
+        actuator_state= (bool) io_handler.getPhDownerPumpStatus();
+        writeBoolEXSerial(actuator_state);
+        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", ph downer pump=" + String(actuator_state));
+
+    } else if (CMD == String(CMD_GET_MIXER_PUMP_STATE)) {
+        actuator_state= (bool) io_handler.getMixerPumpStatus();
+        writeBoolEXSerial(actuator_state);
+        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", mixer pump=" + String(actuator_state));
+
+    }
 
         // Actuator ON/OFF
-    else if (CMD == String(CMD_ON_WATER_PUMP)) { io_handler.onWaterPump(); }
-    else if (CMD == String(CMD_OFF_WATER_PUMP)) { io_handler.offWaterPump(); }
-
-    else if (CMD == String(CMD_ON_NUTRIENT_PUMP)) { io_handler.onNutrientPump(); }
-    else if (CMD == String(CMD_OFF_NUTRIENT_PUMP)) { io_handler.offNutrientPump(); }
-
-    else if (CMD == String(CMD_ON_PH_DOWNER_PUMP)) { io_handler.onPhDownerPump(); }
-    else if (CMD == String(CMD_OFF_PH_DOWNER_PUMP)) { io_handler.offPhDownerPump(); }
-
-    else if (CMD == String(CMD_ON_MIXER_PUMP)) { io_handler.onMixerPump(); }
-    else if (CMD == String(CMD_OFF_MIXER_PUMP)) { io_handler.offMixerPump(); }
-
-    else
+    else if (CMD == String(CMD_ON_WATER_PUMP)) {
+        io_handler.onWaterPump();
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", water pump=ON");
+    } else if (CMD == String(CMD_OFF_WATER_PUMP)) {
+        io_handler.offWaterPump();
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", water pump=OFF");
+    } else if (CMD == String(CMD_ON_NUTRIENT_PUMP)) {
+        io_handler.onNutrientPump();
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", nutrient pump=ON");
+    } else if (CMD == String(CMD_OFF_NUTRIENT_PUMP)) {
+        io_handler.offNutrientPump();
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", nutrient pump=OFF");
+    } else if (CMD == String(CMD_ON_PH_DOWNER_PUMP)) {
+        io_handler.onPhDownerPump();
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", pH downer pump=ON");
+    } else if (CMD == String(CMD_OFF_PH_DOWNER_PUMP)) {
+        io_handler.offPhDownerPump();
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", pH downer pump=OFF");
+    } else if (CMD == String(CMD_ON_MIXER_PUMP)) {
+        io_handler.onMixerPump();
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", mixer pump=ON");
+    } else if (CMD == String(CMD_OFF_MIXER_PUMP)) {
+        io_handler.offMixerPump();
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", mixer pump=OFF");
+    } else
         callBackUnknown();
 
-    flushEXSerial();
 }
