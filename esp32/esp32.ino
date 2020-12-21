@@ -283,10 +283,10 @@ String generateInfluxLineProtocol() {
     String lineProtoStr =
             "water,tag=" + String(NODE_TAG)
             + " water_level_cm=" + String(water_level_cm) + "i,"
-            + " nutrient_level_cm=" + String(nutrient_level_cm) + "i,"
-            + " ph_downer_level_cm=" + String(ph_downer_level_cm) + "i,"
-            + " ph_level=" + String(ph_level) + "i,"
-            + " tds_level=" + String(tds_level) + "i";
+            + "nutrient_level_cm=" + String(nutrient_level_cm) + "i,"
+            + "ph_downer_level_cm=" + String(ph_downer_level_cm) + "i,"
+            + "ph_level=" + String(ph_level) + "i,"
+            + "tds_level=" + String(tds_level) + "i";
 
     return lineProtoStr;
 }
