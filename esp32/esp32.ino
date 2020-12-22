@@ -170,22 +170,30 @@ void flushSerial2() {
 int readMegaInteger(char *cmd) {
 
     int tmp;
+    DynamicJsonDocument doc(1024);
+
     Serial2.write(cmd, 3);
     delay(20);
     waitMega();
-    buffer[0] = Serial2.read();
-    buffer[1] = Serial2.read();
-    tmp = buffer[1] << 8 | buffer[0];
+
+    auto error = deserializeJson(doc, Serial2);
+    if (error) {
+        Serial.print(F("deserializeJson() failed with code "));
+        Serial.println(error.c_str());
+        tmp = -999;
+    } else {
+        tmp = doc["response"];
+        Serial.print("[Serial2] >> CMD=");
+        Serial.println(cmd);
+        Serial.print("[Serial2] << Sensor=");
+        Serial.println(tmp);
+
+    }
 
     // flush receiving bytes
     flushSerial2();
-
-    Serial.print("[Serial2] >> CMD=");
-    Serial.println(cmd);
-    Serial.print("[Serial2] << Sensor=");
-    Serial.println(tmp);
-
     return tmp;
+
 }
 
 bool readMegaBool(char *cmd) {
@@ -208,11 +216,30 @@ bool readMegaBool(char *cmd) {
 }
 
 void readAllMegaSensors() {
-    water_level_cm = readMegaInteger(CMD_GET_WATER_LEVEL);
-    nutrient_level_cm = readMegaInteger(CMD_GET_NUTRIENT_LEVEL);
-    ph_downer_level_cm = readMegaInteger(CMD_GET_PH_DOWNER_LEVEL);
-    ph_level = readMegaInteger(CMD_GET_TDS);
-    tds_level = readMegaInteger(CMD_GET_PH);
+    int tmp = readMegaInteger(CMD_GET_WATER_LEVEL);
+    if (tmp != -999) {
+        water_level_cm = tmp;
+    }
+
+    tmp = readMegaInteger(CMD_GET_NUTRIENT_LEVEL);
+    if (tmp != -999) {
+        nutrient_level_cm = tmp;
+    }
+
+    tmp = readMegaInteger(CMD_GET_PH_DOWNER_LEVEL);
+    if (tmp != -999) {
+        ph_downer_level_cm = tmp;
+    }
+
+    tmp = readMegaInteger(CMD_GET_TDS);
+    if (tmp != -999) {
+        ph_level = tmp;
+    }
+
+    tmp = readMegaInteger(CMD_GET_PH);
+    if (tmp != -999) {
+        tds_level = tmp;
+    }
 }
 
 
@@ -294,11 +321,11 @@ String generateInfluxLineProtocol() {
 
 void loop() {
 
-     //reconnect MQTT Client if not connected
-     if (!client.connected()) {
+    //reconnect MQTT Client if not connected
+    if (!client.connected()) {
         reconnect_mqtt();
-     }
-     client.loop();
+    }
+    client.loop();
     // read sensors from Mega and update globals vars
     readAllMegaSensors();
 
@@ -314,6 +341,6 @@ void loop() {
                              ph_level, tds_level, water_pump_state, nutrient_pump_state, ph_downer_pump_state,
                              mixer_pump_state
     );
-    
+
     delay(300);
 }
