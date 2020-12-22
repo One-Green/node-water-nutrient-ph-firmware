@@ -11,6 +11,7 @@
 
 
 #include <SoftwareSerial.h>
+#include <ArduinoJson.h>
 #include "OGIO.h"
 
 #define RXD10 10
@@ -70,7 +71,9 @@ String readCMDFromESP() {
 }
 
 void writeIntegerEXSerial(int intValue) {
-
+    /*
+     *  replaced by ArduinoJSON
+     * */
     int data[2];
     data[0] = intValue & 0xFF;
     data[1] = (intValue >> 8);
@@ -114,6 +117,7 @@ void flushEXSerial() {
 
 void loop() {
 
+    StaticJsonDocument<100> doc;
     int sensor_value;
     bool actuator_state;
 
@@ -122,32 +126,41 @@ void loop() {
     if (CMD == String(CMD_ALIVE)) {
         callBackWriteAlive();
     }
-
         // Sensors callbacks
     else if (CMD == String(CMD_GET_WATER_LEVEL)) {
         sensor_value = io_handler.getWaterLevelCM();
-        writeIntegerEXSerial(sensor_value);
+        doc["response"] = sensor_value;
+        serializeJson(doc, EXSerial);
         Serial.println("[EXSerial] Responding to CMD=" + CMD + ", water level=" + sensor_value);
+        serializeJsonPretty(doc, Serial);
 
     } else if (CMD == String(CMD_GET_NUTRIENT_LEVEL)) {
         sensor_value = io_handler.getNutrientLevelCM();
-        writeIntegerEXSerial(sensor_value);
+        doc["response"] = sensor_value;
+        serializeJson(doc, EXSerial);
         Serial.println("[EXSerial] Responding to CMD=" + CMD + ", nutrient level=" + sensor_value);
+        serializeJsonPretty(doc, Serial);
 
     } else if (CMD == String(CMD_GET_PH_DOWNER_LEVEL)) {
         sensor_value = io_handler.getPhDownerLevelCM();
-        writeIntegerEXSerial(sensor_value);
+        doc["response"] = sensor_value;
+        serializeJson(doc, EXSerial);
         Serial.println("[EXSerial] Responding to CMD=" + CMD + ", ph downer level=" + sensor_value);
+        serializeJsonPretty(doc, Serial);
 
     } else if (CMD == String(CMD_GET_TDS)) {
         sensor_value = io_handler.getPhLevel();
-        writeIntegerEXSerial(sensor_value);
+        doc["response"] = sensor_value;
+        serializeJson(doc, EXSerial);
         Serial.println("[EXSerial] Responding to CMD=" + CMD + ", tds=" + sensor_value);
+        serializeJsonPretty(doc, Serial);
 
     } else if (CMD == String(CMD_GET_PH)) {
         sensor_value = io_handler.getTDS();
-        writeIntegerEXSerial(sensor_value);
+        doc["response"] = sensor_value;
+        serializeJson(doc, EXSerial);
         Serial.println("[EXSerial] Responding to CMD=" + CMD + ", pH=" + sensor_value);
+        serializeJsonPretty(doc, Serial);
     }
 
         // Actuator status callback
@@ -162,12 +175,12 @@ void loop() {
         Serial.println("[EXSerial] Responding to CMD=" + CMD + ", nutrient pump=" + String(actuator_state));
 
     } else if (CMD == String(CMD_GET_PH_DOWNER_PUMP_STATE)) {
-        actuator_state= (bool) io_handler.getPhDownerPumpStatus();
+        actuator_state = (bool) io_handler.getPhDownerPumpStatus();
         writeBoolEXSerial(actuator_state);
         Serial.println("[EXSerial] Responding to CMD=" + CMD + ", ph downer pump=" + String(actuator_state));
 
     } else if (CMD == String(CMD_GET_MIXER_PUMP_STATE)) {
-        actuator_state= (bool) io_handler.getMixerPumpStatus();
+        actuator_state = (bool) io_handler.getMixerPumpStatus();
         writeBoolEXSerial(actuator_state);
         Serial.println("[EXSerial] Responding to CMD=" + CMD + ", mixer pump=" + String(actuator_state));
 
@@ -201,4 +214,5 @@ void loop() {
     } else
         callBackUnknown();
 
+    Serial.println("");
 }
