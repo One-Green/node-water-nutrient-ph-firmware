@@ -281,23 +281,26 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
     String tmpMessage;
 
     for (int i = 0; i < length; i++) {
-        Serial.print((char) message[i]);
         tmpMessage += (char) message[i];
     }
-    Serial.println();
 
     DynamicJsonDocument doc(1024);
     deserializeJson(doc, tmpMessage);
     JsonObject obj = doc.as<JsonObject>();
+    serializeJsonPretty(doc, Serial);
+    Serial.println();
 
-    ctl_water_pump = obj[String("ctl_water_pump")];
-    ctl_nutrient_pump = obj[String("ctl_nutrient_pump")];
-    ctl_ph_downer_pump = obj[String("ctl_ph_downer_pump")];
-    ctl_mixer_pump = obj[String("ctl_mixer_pump")];
-    ctl_ph_level_min = obj[String("ctl_ph_level_min")];
-    ctl_ph_level_max = obj[String("ctl_ph_level_max")];
-    ctl_tds_level_min = obj[String("ctl_tds_level_min")];
-    ctl_tds_level_max = obj[String("ctl_tds_level_max")];
+
+    ctl_water_pump = obj[String("water_pump_signal")];
+    ctl_nutrient_pump = obj[String("nutrient_pump_signal")];
+    ctl_ph_downer_pump = obj[String("ph_downer_pump_signal")];
+    // TODO: how to handle mixer ?
+    // ctl_mixer_pump = obj[String("mixer_pump")];
+
+    ctl_ph_level_min = obj[String("ph_min_level")];
+    ctl_ph_level_max = obj[String("ph_max_level")];
+    ctl_tds_level_min = obj[String("tds_min_level")];
+    ctl_tds_level_max = obj[String("tds_max_level")];
 
     // TODO : add actuator flow below
 
@@ -339,7 +342,8 @@ void loop() {
     // update TFT screen
     displayLib.updateDisplay(water_level_cm, nutrient_level_cm, ph_downer_level_cm,
                              ph_level, tds_level, water_pump_state, nutrient_pump_state, ph_downer_pump_state,
-                             mixer_pump_state
+                             mixer_pump_state,
+                             ctl_ph_level_min, ctl_ph_level_max, ctl_tds_level_min, ctl_tds_level_max
     );
 
     delay(300);
