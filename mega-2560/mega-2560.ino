@@ -189,28 +189,52 @@ void loop() {
         // Actuator ON/OFF
     else if (CMD == String(CMD_ON_WATER_PUMP)) {
         io_handler.onWaterPump();
-        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", water pump=ON");
+        actuator_state = (bool) io_handler.getWaterPumpStatus();
+        writeBoolEXSerial(actuator_state);
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", water pump=" + String(actuator_state));
+
     } else if (CMD == String(CMD_OFF_WATER_PUMP)) {
         io_handler.offWaterPump();
-        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", water pump=OFF");
+        actuator_state = (bool) io_handler.getWaterPumpStatus();
+        writeBoolEXSerial(actuator_state);
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", water pump=" + String(actuator_state));
+
     } else if (CMD == String(CMD_ON_NUTRIENT_PUMP)) {
         io_handler.onNutrientPump();
-        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", nutrient pump=ON");
+        actuator_state = (bool) io_handler.getNutrientPumpStatus();
+        writeBoolEXSerial(actuator_state);
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", nutrient pump=" + String(actuator_state));
+
     } else if (CMD == String(CMD_OFF_NUTRIENT_PUMP)) {
         io_handler.offNutrientPump();
-        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", nutrient pump=OFF");
+        actuator_state = (bool) io_handler.getNutrientPumpStatus();
+        writeBoolEXSerial(actuator_state);
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", nutrient pump=" + String(actuator_state));
+
     } else if (CMD == String(CMD_ON_PH_DOWNER_PUMP)) {
         io_handler.onPhDownerPump();
-        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", pH downer pump=ON");
+        actuator_state = (bool) io_handler.getPhDownerPumpStatus();
+        writeBoolEXSerial(actuator_state);
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", pH downer pump=" + String(actuator_state));
+
     } else if (CMD == String(CMD_OFF_PH_DOWNER_PUMP)) {
         io_handler.offPhDownerPump();
-        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", pH downer pump=OFF");
+        actuator_state = (bool) io_handler.getPhDownerPumpStatus();
+        writeBoolEXSerial(actuator_state);
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", pH downer pump=" + String(actuator_state));
+
     } else if (CMD == String(CMD_ON_MIXER_PUMP)) {
         io_handler.onMixerPump();
-        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", mixer pump=ON");
+        actuator_state = (bool) io_handler.getMixerPumpStatus();
+        writeBoolEXSerial(actuator_state);
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", mixer pump=" + String(actuator_state));
+
     } else if (CMD == String(CMD_OFF_MIXER_PUMP)) {
         io_handler.offMixerPump();
-        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", mixer pump=OFF");
+        actuator_state = (bool) io_handler.getMixerPumpStatus();
+        writeBoolEXSerial(actuator_state);
+        Serial.println("[EXSerial] Actuator CMD=" + CMD + ", mixer pump=" + String(actuator_state));
+
     } else
         callBackUnknown();
 
