@@ -31,7 +31,7 @@
 
 // -----------------------------------  // Node parameters
 char *NODE_TYPE = "water";
-char *NODE_TAG = "water";                 // not required for node type = water
+char *NODE_TAG = "water";
 
 // -----------------------------------  // Wifi parameters
 char *WIFI_SSID = "*";
@@ -67,10 +67,10 @@ int ph_level;
 int tds_level;
 
 // ----------------------------------   // Actuator
-bool water_pump_state;
-bool nutrient_pump_state;
-bool ph_downer_pump_state;
-bool mixer_pump_state;
+bool last_water_pump_state = false;
+bool last_nutrient_pump_state = false;
+bool last_ph_downer_pump_state = false;
+bool last_mixer_pump_state = false;
 
 // ------------------------------------ // Exchange command ESP32-Mega
 char CMD_ALIVE[2] = "A";
@@ -290,7 +290,7 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
     serializeJsonPretty(doc, Serial);
     Serial.println();
 
-
+    String tag = obj[String("tag")];
     ctl_water_pump = obj[String("water_pump_signal")];
     ctl_nutrient_pump = obj[String("nutrient_pump_signal")];
     ctl_ph_downer_pump = obj[String("ph_downer_pump_signal")];
@@ -303,6 +303,62 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
     ctl_tds_level_max = obj[String("tds_max_level")];
 
     // TODO : add actuator flow below
+    if (tag == NODE_TAG) {
+        // Handle water pump
+        if (ctl_water_pump != last_water_pump_state) {
+            last_water_pump_state = ctl_water_pump;
+            if (ctl_water_pump) {
+                while (readMegaBool(CMD_ON_WATER_PUMP) != 1) {
+                    readMegaBool(CMD_ON_WATER_PUMP);
+                    Serial.println("[I/O] Waiting for water pump activation");
+                }
+                Serial.println("[I/O] Water pump is OPENED");
+            } else {
+                while (readMegaBool(CMD_OFF_WATER_PUMP) != 0) {
+                    readMegaBool(CMD_OFF_WATER_PUMP);
+                    Serial.println("[I/O] Waiting for water pump closing");
+                }
+                Serial.println("[I/O] Water pump is CLOSED");
+            }
+        }
+        // handle nutrient pump
+        if (ctl_nutrient_pump != last_nutrient_pump_state) {
+            last_nutrient_pump_state = ctl_nutrient_pump;
+            if (last_nutrient_pump_state) {
+                while (readMegaBool(CMD_ON_NUTRIENT_PUMP) != 1) {
+                    readMegaBool(CMD_ON_NUTRIENT_PUMP);
+                    Serial.println("[I/O] Waiting for nutrient pump activation");
+                }
+                Serial.println("[I/O] Nutrient pump is OPENED");
+            } else {
+                while (readMegaBool(CMD_OFF_NUTRIENT_PUMP) != 0) {
+                    readMegaBool(CMD_OFF_NUTRIENT_PUMP);
+                    Serial.println("[I/O] Waiting for nutrient pump closing");
+                }
+                Serial.println("[I/O] Nutrient pump is CLOSED");
+            }
+        }
+
+        // handle pH downer pump
+        if (ctl_nutrient_pump != last_ph_downer_pump_state) {
+            last_ph_downer_pump_state = ctl_nutrient_pump;
+            if (last_ph_downer_pump_state) {
+                while (readMegaBool(CMD_ON_PH_DOWNER_PUMP) != 1) {
+                    readMegaBool(CMD_ON_PH_DOWNER_PUMP);
+                    Serial.println("[I/O] Waiting for pH downer pump activation");
+                }
+                Serial.println("[I/O] pH downer pump is OPENED");
+            } else {
+                while (readMegaBool(CMD_OFF_PH_DOWNER_PUMP) != 0) {
+                    readMegaBool(CMD_OFF_PH_DOWNER_PUMP);
+                    Serial.println("[I/O] Waiting for pH downer pump closing");
+                }
+                Serial.println("[I/O] pH downer pump is CLOSED");
+            }
+        }
+
+    }
+
 
 }
 
@@ -341,8 +397,8 @@ void loop() {
     client.publish(SENSOR_TOPIC, line_proto_char);
     // update TFT screen
     displayLib.updateDisplay(water_level_cm, nutrient_level_cm, ph_downer_level_cm,
-                             ph_level, tds_level, water_pump_state, nutrient_pump_state, ph_downer_pump_state,
-                             mixer_pump_state,
+                             ph_level, tds_level, last_water_pump_state, last_nutrient_pump_state,
+                             last_ph_downer_pump_state, last_mixer_pump_state,
                              ctl_ph_level_min, ctl_ph_level_max, ctl_tds_level_min, ctl_tds_level_max
     );
 
