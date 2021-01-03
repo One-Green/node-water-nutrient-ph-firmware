@@ -167,13 +167,13 @@ void flushSerial2() {
     }
 }
 
-int readMegaInteger(char *cmd) {
+int readMegaInteger(char *cmd, String key) {
 
     int tmp;
     DynamicJsonDocument doc(1024);
 
     Serial2.write(cmd, 3);
-    delay(20);
+    delay(100);
     waitMega();
 
     auto error = deserializeJson(doc, Serial2);
@@ -182,11 +182,20 @@ int readMegaInteger(char *cmd) {
         Serial.println(error.c_str());
         tmp = -999;
     } else {
-        tmp = doc["response"];
-        Serial.print("[Serial2] >> CMD=");
-        Serial.println(cmd);
-        Serial.print("[Serial2] << Sensor=");
-        Serial.println(tmp);
+        const char *key_error = doc[key];
+        if (key_error) {
+            Serial.println(key_error);
+            tmp = -999;
+        } else {
+            tmp = doc[key];
+            if (tmp == 0) {
+                tmp = -999;
+            }
+            Serial.print("[Serial2] >> CMD=");
+            Serial.println(cmd);
+            Serial.print("[Serial2] << Sensor=");
+            Serial.println(tmp);
+        }
 
     }
 
@@ -216,30 +225,33 @@ bool readMegaBool(char *cmd) {
 }
 
 void readAllMegaSensors() {
-    int tmp = readMegaInteger(CMD_GET_WATER_LEVEL);
+    int tmp = 0;
+
+    tmp = readMegaInteger(CMD_GET_WATER_LEVEL, "water_level_cm");
     if (tmp != -999) {
         water_level_cm = tmp;
     }
 
-    tmp = readMegaInteger(CMD_GET_NUTRIENT_LEVEL);
+    tmp = readMegaInteger(CMD_GET_NUTRIENT_LEVEL, "nutrient_level_cm");
     if (tmp != -999) {
         nutrient_level_cm = tmp;
     }
 
-    tmp = readMegaInteger(CMD_GET_PH_DOWNER_LEVEL);
+    tmp = readMegaInteger(CMD_GET_PH_DOWNER_LEVEL, "ph_downer_level_cm");
     if (tmp != -999) {
         ph_downer_level_cm = tmp;
     }
 
-    tmp = readMegaInteger(CMD_GET_TDS);
+    tmp = readMegaInteger(CMD_GET_PH, "ph_level");
+    if (tmp != -999) {
+        tds_level = tmp;
+    }
+
+    tmp = readMegaInteger(CMD_GET_TDS, "tds_level");
     if (tmp != -999) {
         ph_level = tmp;
     }
 
-    tmp = readMegaInteger(CMD_GET_PH);
-    if (tmp != -999) {
-        tds_level = tmp;
-    }
 }
 
 
