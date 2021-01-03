@@ -23,6 +23,13 @@ OGIO io_handler;                        // sensors/actuator handler
 char buffer[10];                        // EXSerial/EXSerial buffer
 String CMD;                             // CMD received from ESP32
 
+// ----------------------------------   // Sensors
+int water_level_cm;
+int nutrient_level_cm;
+int ph_downer_level_cm;
+int ph_level;
+int tds_level;
+
 // ------------------------------------ // Exchange command ESP32-Mega
 char CMD_ALIVE[2] = "A";
 
@@ -118,7 +125,6 @@ void flushEXSerial() {
 void loop() {
 
     StaticJsonDocument<100> doc;
-    int sensor_value;
     bool actuator_state;
 
     CMD = readCMDFromESP();
@@ -128,38 +134,33 @@ void loop() {
     }
         // Sensors callbacks
     else if (CMD == String(CMD_GET_WATER_LEVEL)) {
-        sensor_value = io_handler.getWaterLevelCM();
-        doc["response"] = sensor_value;
+        doc["water_level_cm"] = io_handler.getWaterLevelCM();
         serializeJson(doc, EXSerial);
-        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", water level=" + sensor_value);
+        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", water level=" + String(water_level_cm));
         serializeJsonPretty(doc, Serial);
 
     } else if (CMD == String(CMD_GET_NUTRIENT_LEVEL)) {
-        sensor_value = io_handler.getNutrientLevelCM();
-        doc["response"] = sensor_value;
+        doc["nutrient_level_cm"] = io_handler.getNutrientLevelCM();
         serializeJson(doc, EXSerial);
-        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", nutrient level=" + sensor_value);
+        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", nutrient level=" + String(nutrient_level_cm));
         serializeJsonPretty(doc, Serial);
 
     } else if (CMD == String(CMD_GET_PH_DOWNER_LEVEL)) {
-        sensor_value = io_handler.getPhDownerLevelCM();
-        doc["response"] = sensor_value;
+        doc["ph_downer_level_cm"] = io_handler.getPhDownerLevelCM();
         serializeJson(doc, EXSerial);
-        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", ph downer level=" + sensor_value);
-        serializeJsonPretty(doc, Serial);
-
-    } else if (CMD == String(CMD_GET_TDS)) {
-        sensor_value = io_handler.getPhLevel();
-        doc["response"] = sensor_value;
-        serializeJson(doc, EXSerial);
-        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", tds=" + sensor_value);
+        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", ph downer level=" + String(ph_downer_level_cm));
         serializeJsonPretty(doc, Serial);
 
     } else if (CMD == String(CMD_GET_PH)) {
-        sensor_value = io_handler.getTDS();
-        doc["response"] = sensor_value;
+        doc["ph_level"] = io_handler.getPhLevel();
         serializeJson(doc, EXSerial);
-        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", pH=" + sensor_value);
+        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", tds=" + String(ph_level));
+        serializeJsonPretty(doc, Serial);
+
+    } else if (CMD == String(CMD_GET_TDS)) {
+        doc["tds_level"] = io_handler.getTDS();
+        serializeJson(doc, EXSerial);
+        Serial.println("[EXSerial] Responding to CMD=" + CMD + ", pH=" + String(tds_level));
         serializeJsonPretty(doc, Serial);
     }
 
