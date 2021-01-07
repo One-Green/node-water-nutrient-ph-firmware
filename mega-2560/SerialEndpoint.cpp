@@ -425,22 +425,26 @@ bool SerialEndpointClass::attendGetPumpStateReq(uint8_t pumpCommand)
   uint8_t pumpState = 0;
   if (pumpCommand == CMD_GET_WATER_PUMP_STATE)
   {
-    //TODO: get water pump state
+    //get water pump state
+    pumpState = io_handler.getWaterPumpStatus();
     status = true;
   }
    else if (pumpCommand == CMD_GET_NUTRIENT_PUMP_STATE)
   {
-    //TODO: get nutrient pump state
+    //get nutrient pump state
+    pumpState = io_handler.getNutrientPumpStatus();
     status = true;
   }
    else if (pumpCommand == CMD_GET_PH_DOWNER_PUMP_STATE)
   {
-    //TODO: get downer pump state
+    //get downer pump state
+    pumpState = io_handler.getPhDownerPumpStatus();
     status = true;
   }
    else if (pumpCommand == CMD_GET_MIXER_PUMP_STATE)
   {
-    //TODO: get mixer pump state
+    //get mixer pump state
+    pumpState = io_handler.getMixerPumpStatus();
     status = true;
   }
   this->sendCommand8(pumpCommand, pumpState);
@@ -453,22 +457,26 @@ bool SerialEndpointClass::attendSetPumpStateReq(uint8_t pumpCommand, char * buff
   uint8_t pumpState = buffData[1];
   if (pumpCommand == CMD_SET_WATER_PUMP_STATE)
   {
-    //TODO: set water pump state
+    //set water pump state
+    io_handler.setWaterPump(pumpState);
     status = true;
   }
    else if (pumpCommand == CMD_SET_NUTRIENT_PUMP_STATE)
   {
-    //TODO: set nutrient pump state
+    //set nutrient pump state
+    io_handler.setNutrientPump(pumpState);
     status = true;
   }
    else if (pumpCommand == CMD_SET_DOWNER_PUMP_STATE)
   {
-    //TODO: set downer pump state
+    //set downer pump state
+    io_handler.setPHDownerPump(pumpState);
     status = true;
   }
    else if (pumpCommand == CMD_SET_MIXER_PUMP_STATE)
   {
-    //TODO: set mixer pump state
+    //set mixer pump state
+    io_handler.setMixerPump(pumpState);
     status = true;
   }
   this->sendCommand8(pumpCommand, pumpState);
