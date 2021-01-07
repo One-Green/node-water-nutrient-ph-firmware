@@ -28,7 +28,8 @@
 #include <HTTPClient.h>
 #include <PubSubClient.h>
 #include "OGDisplay.h"
-
+#include "SerialBridgeConf.h"
+#include "SerialEndpoint.h"
 // -----------------------------------  // Node parameters
 char *NODE_TYPE = "water";
 char *NODE_TAG = "water";
@@ -44,6 +45,8 @@ char *MQTT_PASSWORD = "admin";
 int MQTT_PORT = 30180;
 char *SENSOR_TOPIC = "water/sensor";
 char *SENSOR_CONTROLLER = "water/controller";
+unsigned long pubSensorTimer;
+const int sensorPubRateSec = 10; //send sensor values each 10 sec
 // Parameter from Master, provided by MQTT JSON
 bool ctl_water_pump;
 bool ctl_nutrient_pump;
@@ -110,6 +113,9 @@ void setup() {
     Serial.begin(9600);
     Serial.println("Serial/Serial2 ok");
 
+    /* Serial Bridge Init */
+    SerialEndpoint.begin();
+
     /* Display Init */
     displayLib.initR();
     displayLib.initWifi();
@@ -135,6 +141,8 @@ void setup() {
     /* MQTT connexion */
     client.setServer(MQTT_SERVER, MQTT_PORT);
     client.setCallback(mqttCallback);
+
+    pubSensorTimer = millis();
 }
 
 
@@ -144,13 +152,21 @@ void loop() {
     if (!client.connected()) {
         reconnect_mqtt();
     }
-    client.loop();
-    // read sensors from Mega and update globals vars
-    //TODO: call serialBridge here
-    // readAllMegaSensors();
 
-    //send sensors to MQTT Broker
-    pubSensorsVals();
+    client.loop();
+
+    SerialEndpoint.loop();
+    
+    if (client.connected() && (millis() - pubSensorTimer > sensorPubRateSec))
+    {
+        //get sensors values from mega
+        readAllMegaSensors();
+        //send sensors to MQTT Broker
+        pubSensorsVals();
+        //update timer
+        pubSensorTimer = millis();
+    }
+
 
     // update TFT screen
     displayLib.updateDisplay(water_level_cm, nutrient_level_cm, ph_downer_level_cm,
@@ -318,4 +334,11 @@ String generateInfluxLineProtocol() {
             + "tds_level=" + String(tds_level) + "i";
 
     return lineProtoStr;
+}
+
+/* Serial Bridge Functions */
+
+void readAllMegaSensors()
+{
+    // SerialEndpoint.getSensorValueReq() TODO: get all sensors values
 }
