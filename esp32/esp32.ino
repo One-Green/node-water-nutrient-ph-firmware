@@ -47,64 +47,34 @@ char *SENSOR_TOPIC = "water/sensor";
 char *SENSOR_CONTROLLER = "water/controller";
 unsigned long pubSensorTimer;
 const int sensorPubRateSec = 10; //send sensor values each 10 sec
+
 // Parameter from Master, provided by MQTT JSON
-bool ctl_water_pump;
-bool ctl_nutrient_pump;
-bool ctl_ph_downer_pump;
-bool ctl_mixer_pump;
-int ctl_ph_level_min;
-int ctl_ph_level_max;
-int ctl_tds_level_min;
-int ctl_tds_level_max;
+bool ctl_water_pump = false;
+bool ctl_nutrient_pump = false;
+bool ctl_ph_downer_pump = false;
+bool ctl_mixer_pump = false;
+int ctl_ph_level_min = 0;
+int ctl_ph_level_max = 0;
+int ctl_tds_level_min = 0;
+int ctl_tds_level_max = 0;
 
-// ----------------------------------   // Communication ESP32 - MEGA 2560
-#define RXD2 16
-#define TXD2 17
-char buffer[10];                        // Serial2/EXSerial buffer
+// ----------------------------------   // Sensors Regs Values
+int water_level_cm = 0;
+int nutrient_level_cm = 0;
+int ph_downer_level_cm = 0;
+int ph_level = 0;
+int tds_level = 0;
 
-// ----------------------------------   // Sensors
-int water_level_cm;
-int nutrient_level_cm;
-int ph_downer_level_cm;
-int ph_level;
-int tds_level;
-
-// ----------------------------------   // Actuator
+// ----------------------------------   // Actuators
 bool last_water_pump_state = false;
 bool last_nutrient_pump_state = false;
 bool last_ph_downer_pump_state = false;
 bool last_mixer_pump_state = false;
-
+//pumps id for serial bridge
 #define WATER_PUMP_ID 1
 #define NUTRIENT_PUMP_ID 2
 #define PH_DOWNER_PUMP_ID 3
 #define MIXER_PUMP_ID 4
-
-// ------------------------------------ // Exchange command ESP32-Mega
-char CMD_ALIVE[2] = "A";
-
-char CMD_GET_WATER_LEVEL[3] = "S0";
-char CMD_GET_NUTRIENT_LEVEL[3] = "S1";
-char CMD_GET_PH_DOWNER_LEVEL[3] = "S2";
-char CMD_GET_TDS[3] = "S3";
-char CMD_GET_PH[3] = "S4";
-
-char CMD_GET_WATER_PUMP_STATE[3] = "P0";
-char CMD_GET_NUTRIENT_PUMP_STATE[3] = "P1";
-char CMD_GET_PH_DOWNER_PUMP_STATE[3] = "P2";
-char CMD_GET_MIXER_PUMP_STATE[3] = "P3";
-
-char CMD_ON_WATER_PUMP[3] = "H1";
-char CMD_OFF_WATER_PUMP[3] = "L1";
-
-char CMD_ON_NUTRIENT_PUMP[3] = "H2";
-char CMD_OFF_NUTRIENT_PUMP[3] = "L2";
-
-char CMD_ON_PH_DOWNER_PUMP[3] = "H2";
-char CMD_OFF_PH_DOWNER_PUMP[3] = "L2";
-
-char CMD_ON_MIXER_PUMP[3] = "H3";
-char CMD_OFF_MIXER_PUMP[3] = "L3";
 
 // ---------------------------------- // Class(es) instantiation(s)
 WiFiClient espClient;
@@ -126,18 +96,7 @@ void setup() {
     displayLib.initWifi();
 
     /* Connect to WiFi */
-    Serial.print("[WIFI] Connecting to ");
-    Serial.print(WIFI_SSID);
-    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-    while (WiFi.status() != WL_CONNECTED) {
-        Serial.print(".");
-        delay(100);
-    }
-    Serial.println("\n");
-    displayLib.connectedWifi();
-    Serial.println("[WIFI] Connected ");
-    Serial.print("[WIFI] IP address: ");
-    Serial.println(WiFi.localIP());
+    connectToWiFiNetwork();
 
     /*Display WiFi Info */
     displayLib.printHeader(WIFI_SSID, WiFi.localIP(), NODE_TYPE, NODE_TAG);
@@ -147,6 +106,7 @@ void setup() {
     client.setServer(MQTT_SERVER, MQTT_PORT);
     client.setCallback(mqttCallback);
 
+    /* Init MQTT Pub Sensor Timer */
     pubSensorTimer = millis();
 }
 
@@ -162,6 +122,7 @@ void loop() {
 
     SerialEndpoint.loop();
     
+    //Pub sensors every 10 secs and only if the client is connected
     if (client.connected() && (millis() - pubSensorTimer > sensorPubRateSec))
     {
         //get sensors values from mega
@@ -183,6 +144,23 @@ void loop() {
     delay(300);
 }
 
+/* WiFi Functions */
+
+void connectToWiFiNetwork()
+{
+    Serial.print("[WIFI] Connecting to ");
+    Serial.print(WIFI_SSID);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    while (WiFi.status() != WL_CONNECTED) {
+        Serial.print(".");
+        delay(100);
+    }
+    Serial.println("\n");
+    displayLib.connectedWifi();
+    Serial.println("[WIFI] Connected ");
+    Serial.print("[WIFI] IP address: ");
+    Serial.println(WiFi.localIP());
+}
 
 /* MQTT Functions */
 
