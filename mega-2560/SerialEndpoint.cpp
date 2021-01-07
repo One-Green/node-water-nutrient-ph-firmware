@@ -163,7 +163,7 @@ void SerialEndpointClass::begin()
   memset(incomingSensorVal, 0, 5);
   memset(incomingPumpState, 0, 4);
   
-  slip.begin(115200, attendSerial);
+  slip.begin(attendSerial);
   this->sendAck();  // Send ack for flushing any pending messages sent from the gateway before we were ready
 }
 
@@ -411,7 +411,7 @@ bool SerialEndpointClass::attendGetSensorValueReq(uint8_t sensorCommand)
   else if (sensorCommand == CMD_GET_PH)
   {
     //get ph val
-    sensorVal = (uint16_t)(io_handler.getPhLevel * 100.00);
+    sensorVal = (uint16_t)(io_handler.getPhLevel() * 100.00);
     status = true;
   }
   /* Send sensor value */
@@ -447,7 +447,7 @@ bool SerialEndpointClass::attendGetPumpStateReq(uint8_t pumpCommand)
     pumpState = io_handler.getMixerPumpStatus();
     status = true;
   }
-  this->sendCommand8(pumpCommand, pumpState);
+  this->sendCommandValue8(pumpCommand, pumpState);
   return status;  
 }
 
@@ -479,7 +479,7 @@ bool SerialEndpointClass::attendSetPumpStateReq(uint8_t pumpCommand, char * buff
     io_handler.setMixerPump(pumpState);
     status = true;
   }
-  this->sendCommand8(pumpCommand, pumpState);
+  this->sendCommandValue8(pumpCommand, pumpState);
   return status;
 }
 #endif
