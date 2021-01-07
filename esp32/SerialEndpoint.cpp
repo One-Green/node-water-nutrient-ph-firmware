@@ -215,7 +215,7 @@ void SerialEndpointClass::setPumpStateReq(uint8_t pumpCommand, uint8_t state)
     pumpCommandFinal = CMD_SET_MIXER_PUMP_STATE;
     break;
   default:
-    pumpCommandFinal = CMD_SET_WATER_PUMP_STATE
+    pumpCommandFinal = CMD_SET_WATER_PUMP_STATE;
     break;
   }
   this->sendCommandValue8(pumpCommandFinal, state);
