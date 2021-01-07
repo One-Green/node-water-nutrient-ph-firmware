@@ -35,5 +35,7 @@ public:
     int baseUltrasonicReader(int trigger, int echo);
 };
 
+extern OGIO io_handler;
+
 
 #endif //NODE_WATER_ARDUINO_OGIO_H

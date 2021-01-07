@@ -206,3 +206,4 @@ int OGIO::baseUltrasonicReader(int trigger, int echo) {
     distance = duration * 0.034 / 2;
     return distance;
 }
+OGIO io_handler;
