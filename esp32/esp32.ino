@@ -137,6 +137,34 @@ void setup() {
     client.setCallback(mqttCallback);
 }
 
+
+void loop() {
+
+    //reconnect MQTT Client if not connected
+    if (!client.connected()) {
+        reconnect_mqtt();
+    }
+    client.loop();
+    // read sensors from Mega and update globals vars
+    //TODO: call serialBridge here
+    // readAllMegaSensors();
+
+    //send sensors to MQTT Broker
+    pubSensorsVals();
+
+    // update TFT screen
+    displayLib.updateDisplay(water_level_cm, nutrient_level_cm, ph_downer_level_cm,
+                             ph_level, tds_level, last_water_pump_state, last_nutrient_pump_state,
+                             last_ph_downer_pump_state, last_mixer_pump_state,
+                             ctl_ph_level_min, ctl_ph_level_max, ctl_tds_level_min, ctl_tds_level_max
+    );
+
+    delay(300);
+}
+
+
+/* MQTT Functions */
+
 void reconnect_mqtt() {
     // Loop until we're reconnected
     while (!client.connected()) {
@@ -265,6 +293,18 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
     }
 }
 
+void pubSensorsVals()
+{
+    String line_proto = generateInfluxLineProtocol();
+    Serial.println(line_proto);
+    // convert string to char and publish to mqtt
+    int line_proto_len = line_proto.length() + 1;
+    char line_proto_char[line_proto_len];
+    line_proto.toCharArray(line_proto_char, line_proto_len);
+    client.publish(SENSOR_TOPIC, line_proto_char);
+}
+
+/* Sensors Payload Builder */
 String generateInfluxLineProtocol() {
     /*
      * Format sensors values for InfluxDB/Line protocol
@@ -278,33 +318,4 @@ String generateInfluxLineProtocol() {
             + "tds_level=" + String(tds_level) + "i";
 
     return lineProtoStr;
-}
-
-
-void loop() {
-
-    //reconnect MQTT Client if not connected
-    if (!client.connected()) {
-        reconnect_mqtt();
-    }
-    client.loop();
-    // read sensors from Mega and update globals vars
-    //TODO: call serialBridge here
-    // readAllMegaSensors();
-
-    String line_proto = generateInfluxLineProtocol();
-    Serial.println(line_proto);
-    // convert string to char and publish to mqtt
-    int line_proto_len = line_proto.length() + 1;
-    char line_proto_char[line_proto_len];
-    line_proto.toCharArray(line_proto_char, line_proto_len);
-    client.publish(SENSOR_TOPIC, line_proto_char);
-    // update TFT screen
-    displayLib.updateDisplay(water_level_cm, nutrient_level_cm, ph_downer_level_cm,
-                             ph_level, tds_level, last_water_pump_state, last_nutrient_pump_state,
-                             last_ph_downer_pump_state, last_mixer_pump_state,
-                             ctl_ph_level_min, ctl_ph_level_max, ctl_tds_level_min, ctl_tds_level_max
-    );
-
-    delay(300);
 }
