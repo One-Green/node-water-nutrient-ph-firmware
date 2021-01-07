@@ -75,6 +75,11 @@ bool last_nutrient_pump_state = false;
 bool last_ph_downer_pump_state = false;
 bool last_mixer_pump_state = false;
 
+#define WATER_PUMP_ID 1
+#define NUTRIENT_PUMP_ID 2
+#define PH_DOWNER_PUMP_ID 3
+#define MIXER_PUMP_ID 4
+
 // ------------------------------------ // Exchange command ESP32-Mega
 char CMD_ALIVE[2] = "A";
 
@@ -249,63 +254,90 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
     ctl_tds_level_max = obj[String("tds_max_level")];
 
     // TODO : add actuator flow below
-    if (tag == NODE_TAG) {
-        // Handle water pump
-        if (ctl_water_pump != last_water_pump_state) {
-            last_water_pump_state = ctl_water_pump;
-            /*
-                TODO:Logic to Implement: ask pump state from mega and it's diferent, update
-            */
-            if (ctl_water_pump) {
-                while (readMegaBool(CMD_ON_WATER_PUMP) != 1) {
-                    readMegaBool(CMD_ON_WATER_PUMP);
-                    Serial.println("[I/O] Waiting for water pump activation");
-                }
-                Serial.println("[I/O] Water pump is OPENED");
-            } else {
-                while (readMegaBool(CMD_OFF_WATER_PUMP) != 0) {
-                    readMegaBool(CMD_OFF_WATER_PUMP);
-                    Serial.println("[I/O] Waiting for water pump closing");
-                }
-                Serial.println("[I/O] Water pump is CLOSED");
+    if (tag != NODE_TAG) return;
+    
+    // Handle water pump
+    if (ctl_water_pump != last_water_pump_state) {
+        last_water_pump_state = ctl_water_pump;
+        if (ctl_water_pump) //turn-ON and confirm 
+        { 
+            while(!SerialEndpoint.setPumpState(WATER_PUMP_ID, 1)) //maybe add timeout
+            {
+                Serial.println("[I/O] Waiting for water pump activation");
             }
-        }
-        // handle nutrient pump
-        if (ctl_nutrient_pump != last_nutrient_pump_state) {
-            last_nutrient_pump_state = ctl_nutrient_pump;
-            if (last_nutrient_pump_state) {
-                while (readMegaBool(CMD_ON_NUTRIENT_PUMP) != 1) {
-                    readMegaBool(CMD_ON_NUTRIENT_PUMP);
-                    Serial.println("[I/O] Waiting for nutrient pump activation");
-                }
-                Serial.println("[I/O] Nutrient pump is OPENED");
-            } else {
-                while (readMegaBool(CMD_OFF_NUTRIENT_PUMP) != 0) {
-                    readMegaBool(CMD_OFF_NUTRIENT_PUMP);
-                    Serial.println("[I/O] Waiting for nutrient pump closing");
-                }
-                Serial.println("[I/O] Nutrient pump is CLOSED");
+            Serial.println("[I/O] Water pump is OPENED");
+        } 
+        else //turn-OFF and confirm 
+        {
+            while (!SerialEndpoint.setPumpState(WATER_PUMP_ID, 0)) //maybe add timeout
+            {
+                Serial.println("[I/O] Waiting for water pump closing");
             }
+            Serial.println("[I/O] Water pump is CLOSED");
         }
+    }
+    // handle nutrient pump
+    if (ctl_nutrient_pump != last_nutrient_pump_state) {
+        last_nutrient_pump_state = ctl_nutrient_pump;
+        if (ctl_nutrient_pump) {
+            while (!SerialEndpoint.setPumpState(NUTRIENT_PUMP_ID, 1)) //maybe add timeout
+            {
+                Serial.println("[I/O] Waiting for nutrient pump activation");
+            }
+            Serial.println("[I/O] Nutrient pump is OPENED");
+        } else {
+            while (!SerialEndpoint.setPumpState(NUTRIENT_PUMP_ID, 0)) //maybe add timeout
+            {
+                Serial.println("[I/O] Waiting for nutrient pump closing");
+            }
+            Serial.println("[I/O] Nutrient pump is CLOSED");
+        }
+    }
 
-        // handle pH downer pump
-        if (ctl_nutrient_pump != last_ph_downer_pump_state) {
-            last_ph_downer_pump_state = ctl_nutrient_pump;
-            if (last_ph_downer_pump_state) {
-                while (readMegaBool(CMD_ON_PH_DOWNER_PUMP) != 1) {
-                    readMegaBool(CMD_ON_PH_DOWNER_PUMP);
-                    Serial.println("[I/O] Waiting for pH downer pump activation");
-                }
-                Serial.println("[I/O] pH downer pump is OPENED");
-            } else {
-                while (readMegaBool(CMD_OFF_PH_DOWNER_PUMP) != 0) {
-                    readMegaBool(CMD_OFF_PH_DOWNER_PUMP);
-                    Serial.println("[I/O] Waiting for pH downer pump closing");
-                }
-                Serial.println("[I/O] pH downer pump is CLOSED");
-            }
-        }
+    // handle pH downer pump
+    if (ctl_ph_downer_pump != last_ph_downer_pump_state) 
+    {
+        last_ph_downer_pump_state = ctl_ph_downer_pump;
 
+        if (ctl_ph_downer_pump) 
+        {
+            while (!SerialEndpoint.setPumpState(PH_DOWNER_PUMP_ID, 1)) //maybe add timeout
+            {
+                Serial.println("[I/O] Waiting for pH downer pump activation");
+            }
+            Serial.println("[I/O] pH downer pump is OPENED");
+        } 
+        else
+        {
+            while (!SerialEndpoint.setPumpState(PH_DOWNER_PUMP_ID, 0)) //maybe add timeout
+            {
+                Serial.println("[I/O] Waiting for pH downer pump closing");
+            }
+            Serial.println("[I/O] pH downer pump is CLOSED");
+        }
+    }
+
+    // handle mixer pump
+    if (ctl_mixer_pump != last_mixer_pump_state)
+    {
+        last_mixer_pump_state = ctl_mixer_pump;
+
+        if (ctl_mixer_pump)
+        {
+            while (!SerialEndpoint.setPumpState(MIXER_PUMP_ID, 1)) //maybe add timeout
+            {
+                Serial.println("[I/O] Waiting for mixer pump activation");
+            }
+            Serial.println("[I/O] mixer pump is OPENED");
+        }
+        else
+        {
+            while (!SerialEndpoint.setPumpState(MIXER_PUMP_ID, 0)) //maybe add timeout
+            {
+                Serial.println("[I/O] Waiting for mixer pump closing");
+            }
+            Serial.println("[I/O] mixer pump is CLOSED");
+        }
     }
 }
 

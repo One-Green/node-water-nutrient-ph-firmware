@@ -199,7 +199,7 @@ void SerialEndpointClass::getPumpStateReq(uint8_t pumpCommand)
 
 void SerialEndpointClass::setPumpStateReq(uint8_t pumpCommand, uint8_t state)
 {
-  uint8_t pumpCommandFinal = 0;
+  uint8_t pumpCommandFinal = CMD_SET_WATER_PUMP_STATE;
   switch (pumpCommand)
   {
   case 1:
