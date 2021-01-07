@@ -86,10 +86,12 @@ void setup() {
 
     /* Serial Ports Init */
     Serial.begin(9600);
-    Serial.println("Serial/Serial2 ok");
+    Serial.println("Serial Begin OK");
 
     /* Serial Bridge Init */
+    Serial2.begin(BRIDGE_BAUD);
     SerialEndpoint.begin();
+    Serial.println("Serial Bridge Begin OK");
 
     /* Display Init */
     displayLib.initR();

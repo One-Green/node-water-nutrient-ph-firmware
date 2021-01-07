@@ -163,7 +163,7 @@ void SerialEndpointClass::begin()
   memset(incomingSensorVal, 0, 5);
   memset(incomingPumpState, 0, 4);
   
-  slip.begin(115200, attendSerial);
+  slip.begin(attendSerial);
   this->sendAck();  // Send ack for flushing any pending messages sent from the gateway before we were ready
 }
 
