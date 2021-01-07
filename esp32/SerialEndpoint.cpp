@@ -160,6 +160,9 @@ void SerialEndpointClass::waitForBufferResponse()
 
 void SerialEndpointClass::begin()
 {
+  memset(incomingSensorVal, 0, 5);
+  memset(incomingPumpState, 0, 4);
+  
   slip.begin(115200, attendSerial);
   this->sendAck();  // Send ack for flushing any pending messages sent from the gateway before we were ready
 }
@@ -188,6 +191,32 @@ void SerialEndpointClass::getSensorValueReq(uint8_t sensorCommand)
   this->waitForBufferResponse();
 }
 
+bool SerialEndpointClass::getAllSensorsValues(uint16_t * sensorBuffer)
+{
+  this->getSensorValueReq(CMD_GET_WATER_LEVEL);
+  if (this->hadError()) return false; //maybe return false
+  delay(10);
+
+  this->getSensorValueReq(CMD_GET_NUTRIENT_LEVEL);
+  if (this->hadError()) return false; //maybe return false
+  delay(10);
+
+  this->getSensorValueReq(CMD_GET_PH_DOWNER_LEVEL);
+  if (this->hadError()) return false; //maybe return false
+  delay(10);
+
+  this->getSensorValueReq(CMD_GET_TDS);
+  if (this->hadError()) return false; //maybe return false
+  delay(10);
+
+  this->getSensorValueReq(CMD_GET_PH);
+  if (this->hadError()) return false; //maybe return false
+
+  sensorBuffer = incomingSensorVal;
+  
+  return true;
+}
+
 void SerialEndpointClass::getPumpStateReq(uint8_t pumpCommand)
 {
   this->sendCommand(pumpCommand);
@@ -208,37 +237,37 @@ bool SerialEndpointClass::attendGetSensorValueRes(uint8_t sensorCommand, char * 
   sensorVal = this->parseValue16(buffData);
   if (sensorCommand == CMD_GET_WATER_LEVEL)
   {
-    //TODO: process and send water level
+    incomingSensorVal[0] = sensorVal;
     DEBUG_PORT.print("Water Level : ");
-    DEBUG_PORT.println(sensorVal);
+    DEBUG_PORT.println(incomingSensorVal[0]);
     status = true;
   }
   else if (sensorCommand == CMD_GET_NUTRIENT_LEVEL)
   {
-    //TODO: process and send nutrient level
+    incomingSensorVal[1] = sensorVal;
     DEBUG_PORT.print("Nutrient Level : ");
-    DEBUG_PORT.println(sensorVal);
+    DEBUG_PORT.println(incomingSensorVal[0]);
     status = true;
   }
   else if (sensorCommand == CMD_GET_PH_DOWNER_LEVEL)
   {
-    //TODO: process and send ph downer level
+    incomingSensorVal[2] = sensorVal;
     DEBUG_PORT.print("PH Downer Level : ");
-    DEBUG_PORT.println(sensorVal);
+    DEBUG_PORT.println(incomingSensorVal[2]);
     status = true;
   }
   else if (sensorCommand == CMD_GET_TDS)
   {
-    //TODO: process and send tds val
+    incomingSensorVal[3] = sensorVal;
     DEBUG_PORT.print("TDS Value : ");
-    DEBUG_PORT.println((float)(sensorVal / 100.00));
+    DEBUG_PORT.println((float)(incomingSensorVal[3] / 100.00));
     status = true;
   }
   else if (sensorCommand == CMD_GET_PH)
   {
-    //TODO: process and send ph val
+    incomingSensorVal[4] = sensorVal;
     DEBUG_PORT.print("PH Value : ");
-    DEBUG_PORT.println((float)(sensorVal / 100.00));
+    DEBUG_PORT.println((float)(incomingSensorVal[4] / 100.00));
     status = true;
   }
   this->clearPendingErrorFlag();

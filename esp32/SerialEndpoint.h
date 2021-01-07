@@ -36,6 +36,9 @@ private:
    */
   void waitForBufferResponse();
 
+  uint16_t incomingSensorVal[5];
+  uint16_t incomingPumpState[4];
+
 public:
   bool _hadError;
   bool waitingResponse;
@@ -65,6 +68,7 @@ public:
   /* Attend Set PUMP State commands : validate if process is success */
   bool attendSetPumpStateRes(uint8_t pumpCommand, char * buffData);
 
+  bool getAllSensorsValues(uint16_t * sensorBuffer);
   #endif
   // Slave Device API Methods
 

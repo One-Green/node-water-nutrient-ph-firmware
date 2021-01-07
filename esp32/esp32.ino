@@ -338,7 +338,15 @@ String generateInfluxLineProtocol() {
 
 /* Serial Bridge Functions */
 
+/* Get All Sensor Values from Arduino Mega*/
 void readAllMegaSensors()
 {
-    // SerialEndpoint.getSensorValueReq() TODO: get all sensors values
+    uint16_t  sensorArr[5];
+    SerialEndpoint.getAllSensorsValues(sensorArr);
+
+    water_level_cm = sensorArr[0];
+    nutrient_level_cm = sensorArr[1];
+    ph_downer_level_cm = sensorArr[2];
+    ph_level = (sensorArr[3] / 100.00);
+    tds_level = (sensorArr[4] / 100.00);
 }
