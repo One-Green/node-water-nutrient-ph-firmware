@@ -105,12 +105,16 @@ DisplayLib displayLib;
 
 
 void setup() {
+
+    /* Serial Ports Init */
     Serial.begin(9600);
-    Serial2.begin(4800, SERIAL_8N1, RXD2, TXD2);
     Serial.println("Serial/Serial2 ok");
 
+    /* Display Init */
     displayLib.initR();
     displayLib.initWifi();
+
+    /* Connect to WiFi */
     Serial.print("[WIFI] Connecting to ");
     Serial.print(WIFI_SSID);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -123,137 +127,15 @@ void setup() {
     Serial.println("[WIFI] Connected ");
     Serial.print("[WIFI] IP address: ");
     Serial.println(WiFi.localIP());
+
+    /*Display WiFi Info */
     displayLib.printHeader(WIFI_SSID, WiFi.localIP(), NODE_TYPE, NODE_TAG);
     displayLib.printTemplate();
 
-    // MQTT connexion
+    /* MQTT connexion */
     client.setServer(MQTT_SERVER, MQTT_PORT);
     client.setCallback(mqttCallback);
 }
-
-void waitMega() {
-    /*
-     *  Wait Mega response
-     * */
-    Serial.print("[Serial2] Waiting response ...");
-    while (Serial2.available() <= 0) {
-        delay(20);
-        Serial.print('.');
-    }
-    Serial.println("");
-}
-
-bool checkMegaAlive() {
-    /*
-     *  Check if mega board is responding
-     *  to Serial2 trigger
-     *  TODO Implement ESP > MEGA reset if serial disconnected
-     *
-     * */
-    Serial2.write(CMD_ALIVE, 2);
-    delay(20);
-    waitMega();
-    Serial2.readBytes(buffer, 10);
-    // Serial.println("[Serial2] alive=" + String(buffer));
-    if (String(buffer) == String(CMD_ALIVE)) {
-        return true;
-    } else
-        return false;
-}
-
-void flushSerial2() {
-    while (Serial2.available() > 0) {
-        Serial2.read();
-    }
-}
-
-int readMegaInteger(char *cmd, String key) {
-
-    int tmp;
-    DynamicJsonDocument doc(1024);
-
-    Serial2.write(cmd, 3);
-    delay(100);
-    waitMega();
-
-    auto error = deserializeJson(doc, Serial2);
-    if (error) {
-        Serial.print(F("deserializeJson() failed with code "));
-        Serial.println(error.c_str());
-        tmp = -999;
-    } else {
-        const char *key_error = doc[key];
-        if (key_error) {
-            Serial.println(key_error);
-            tmp = -999;
-        } else {
-            tmp = doc[key];
-            if (tmp == 0) {
-                tmp = -999;
-            }
-            Serial.print("[Serial2] >> CMD=");
-            Serial.println(cmd);
-            Serial.print("[Serial2] << Sensor=");
-            Serial.println(tmp);
-        }
-
-    }
-
-    // flush receiving bytes
-    flushSerial2();
-    return tmp;
-
-}
-
-bool readMegaBool(char *cmd) {
-    bool tmp;
-
-    Serial2.write(cmd, 3);
-    delay(20);
-    waitMega();
-    tmp = Serial2.read();
-
-    // flush receiving bytes
-    flushSerial2();
-
-    Serial.print("[Serial2] >> CMD=");
-    Serial.println(cmd);
-    Serial.print("[Serial2] << Bool=");
-    Serial.println(tmp);
-
-    return tmp;
-}
-
-void readAllMegaSensors() {
-    int tmp = 0;
-
-    tmp = readMegaInteger(CMD_GET_WATER_LEVEL, "water_level_cm");
-    if (tmp != -999) {
-        water_level_cm = tmp;
-    }
-
-    tmp = readMegaInteger(CMD_GET_NUTRIENT_LEVEL, "nutrient_level_cm");
-    if (tmp != -999) {
-        nutrient_level_cm = tmp;
-    }
-
-    tmp = readMegaInteger(CMD_GET_PH_DOWNER_LEVEL, "ph_downer_level_cm");
-    if (tmp != -999) {
-        ph_downer_level_cm = tmp;
-    }
-
-    tmp = readMegaInteger(CMD_GET_PH, "ph_level");
-    if (tmp != -999) {
-        tds_level = tmp;
-    }
-
-    tmp = readMegaInteger(CMD_GET_TDS, "tds_level");
-    if (tmp != -999) {
-        ph_level = tmp;
-    }
-
-}
-
 
 void reconnect_mqtt() {
     // Loop until we're reconnected
@@ -302,10 +184,18 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
     serializeJsonPretty(doc, Serial);
     Serial.println();
 
+    /* Parse params from MQTT Payload*/
+
+    //Parsing Tag param
     String tag = obj[String("tag")];
+
+    //Parsing Water Pumps param
     ctl_water_pump = obj[String("water_pump_signal")];
+    //Parsing Nutrient Pumps param
     ctl_nutrient_pump = obj[String("nutrient_pump_signal")];
+    //Parsing PH Downer Pumps param
     ctl_ph_downer_pump = obj[String("ph_downer_pump_signal")];
+
     // TODO: how to handle mixer ?
     // ctl_mixer_pump = obj[String("mixer_pump")];
 
@@ -319,6 +209,9 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
         // Handle water pump
         if (ctl_water_pump != last_water_pump_state) {
             last_water_pump_state = ctl_water_pump;
+            /*
+                TODO:Logic to Implement: ask pump state from mega and it's diferent, update
+            */
             if (ctl_water_pump) {
                 while (readMegaBool(CMD_ON_WATER_PUMP) != 1) {
                     readMegaBool(CMD_ON_WATER_PUMP);
@@ -370,8 +263,6 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
         }
 
     }
-
-
 }
 
 String generateInfluxLineProtocol() {
@@ -398,7 +289,8 @@ void loop() {
     }
     client.loop();
     // read sensors from Mega and update globals vars
-    readAllMegaSensors();
+    //TODO: call serialBridge here
+    // readAllMegaSensors();
 
     String line_proto = generateInfluxLineProtocol();
     Serial.println(line_proto);
