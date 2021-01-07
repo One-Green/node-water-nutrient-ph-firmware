@@ -20,7 +20,7 @@ private:
 
 public:
 	Slip();
-	void begin(unsigned long baud, void(*_onReceive)(char* data, uint8_t size));
+	void begin(void(*_onReceive)(char* data, uint8_t size));
 	void loop();
 	void send(char* data, uint8_t size);
 };

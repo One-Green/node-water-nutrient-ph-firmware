@@ -36,9 +36,8 @@ void Slip::parseEscapes()
 	}
 }
 
-void Slip::begin(unsigned long baud, void(*_onReceive)(char* data, uint8_t size))
+void Slip::begin(void(*_onReceive)(char* data, uint8_t size))
 {
-	BRIDGE_PORT.begin(baud);
 	onReceive = _onReceive;
 }
 
