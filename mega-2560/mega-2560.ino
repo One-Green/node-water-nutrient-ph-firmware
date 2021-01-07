@@ -13,6 +13,7 @@
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
 #include "OGIO.h"
+#include "SoftwareSerialDebug.h"
 #include "SerialBridgeConf.h"
 #include "SerialEndpoint.h"
 
@@ -24,7 +25,7 @@ SoftwareSerial EXSerial(RXD10, TXD11);  // Rx, Tx
 void setup() 
 {
     Serial.begin(9600);                   // Debug Serial communication
-    EXSerial.begin(4800);                 // ESP32 Serial communication
+    debugPortBegin(BRIDGE_BAUD);          // Serial Bridge Communication
     SerialEndpoint.begin();               // Init Serial Bridge
     io_handler.initR();                   // I/O setup digital pin mode
     Serial.println("Serial/ExSerial ok");
