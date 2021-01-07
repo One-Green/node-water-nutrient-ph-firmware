@@ -69,6 +69,9 @@ public:
   bool attendSetPumpStateRes(uint8_t pumpCommand, char * buffData);
 
   bool getAllSensorsValues(uint16_t * sensorBuffer);
+
+  /* Set Pump State. Return true when received value is equal to input state*/
+  bool setPumpState(uint8_t pumpId, uint8_t state);
   #endif
   // Slave Device API Methods
 
