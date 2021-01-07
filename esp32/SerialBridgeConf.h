@@ -10,7 +10,7 @@
 /* Serial Bridge Port, Baud and Pins Def */
 #define BRIDGE_TX_PIN TX
 #define BRIDGE_RX_PIN RX
-#define BRIDGE_PORT Serial
+#define BRIDGE_PORT Serial2
 #define BRIDGE_BAUD 9600
 
 #define DEBUG_PORT Serial//TODO: define DEBUG PORT
