@@ -17,14 +17,10 @@ public:
     float getPhLevel();
     float getTDS();
 
-    void onWaterPump();
-    void offWaterPump();
-    void onNutrientPump();
-    void offNutrientPump();
-    void onPhDownerPump();
-    void offPhDownerPump();
-    void onMixerPump();
-    void offMixerPump();
+    void setWaterPump(uint8_t state);
+    void setNutrientPump(uint8_t state);
+    void setPHDownerPump(uint8_t state);
+    void setMixerPump(uint8_t state);
 
     int getWaterPumpStatus();
     int getNutrientPumpStatus();
