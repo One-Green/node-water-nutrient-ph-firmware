@@ -115,38 +115,26 @@ float OGIO::getTDS() {
     }
 }
 
-void OGIO::onWaterPump() {
-    digitalWrite(WaterPumpPin, HIGH);
+void OGIO::setWaterPump(uint8_t state)
+{
+    digitalWrite(WaterPumpPin, state);
 }
 
-void OGIO::offWaterPump() {
-    digitalWrite(WaterPumpPin, LOW);
+void OGIO::setNutrientPump(uint8_t state)
+{
+    digitalWrite(NutrientPumpPin, state);    
 }
 
-void OGIO::onNutrientPump() {
-    digitalWrite(NutrientPumpPin, HIGH);
+void OGIO::setPHDownerPump(uint8_t state)
+{
+    digitalWrite(phDownerPumpPin, state);
 }
 
-void OGIO::offNutrientPump() {
-    digitalWrite(NutrientPumpPin, LOW);
+void OGIO::setMixerPump(uint8_t state)
+{
+    digitalWrite(MixerPumpPin, state);
 }
 
-void OGIO::onPhDownerPump() {
-    digitalWrite(phDownerPumpPin, HIGH);
-}
-
-void OGIO::offPhDownerPump() {
-    digitalWrite(phDownerPumpPin, LOW);
-}
-
-
-void OGIO::onMixerPump() {
-    digitalWrite(MixerPumpPin, HIGH);
-}
-
-void OGIO::offMixerPump() {
-    digitalWrite(MixerPumpPin, LOW);
-}
 
 int OGIO::getWaterPumpStatus(){
     return digitalRead(WaterPumpPin);
@@ -206,3 +194,4 @@ int OGIO::baseUltrasonicReader(int trigger, int echo) {
     distance = duration * 0.034 / 2;
     return distance;
 }
+OGIO io_handler;
