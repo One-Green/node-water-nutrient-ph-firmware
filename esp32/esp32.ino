@@ -35,8 +35,8 @@ char *NODE_TYPE = "water";
 char *NODE_TAG = "water";
 
 // -----------------------------------  // Wifi parameters
-char *WIFI_SSID = "*";
-char *WIFI_PASSWORD = "*";
+char *WIFI_SSID = "Ciau";
+char *WIFI_PASSWORD = "EaSyNeTMilk2";
 
 // -----------------------------------  // MQTT parameters
 char *MQTT_SERVER = "010e7d5e-3a86-4c87-a4bc-8d7a82bf5d2e.nodes.k8s.fr-par.scw.cloud";
@@ -125,7 +125,7 @@ void loop() {
     SerialEndpoint.loop();
     
     //Pub sensors every 10 secs and only if the client is connected
-    if (client.connected() && (millis() - pubSensorTimer > sensorPubRateSec))
+    if (client.connected() && (millis() - pubSensorTimer > (sensorPubRateSec * 1000)))
     {
         //get sensors values from mega
         readAllMegaSensors();
@@ -329,7 +329,7 @@ void pubSensorsVals()
     int line_proto_len = line_proto.length() + 1;
     char line_proto_char[line_proto_len];
     line_proto.toCharArray(line_proto_char, line_proto_len);
-    client.publish(SENSOR_TOPIC, line_proto_char);
+    //client.publish(SENSOR_TOPIC, line_proto_char);
 }
 
 /* Sensors Payload Builder */
@@ -353,12 +353,17 @@ String generateInfluxLineProtocol() {
 /* Get All Sensor Values from Arduino Mega*/
 void readAllMegaSensors()
 {
-    uint16_t  sensorArr[5];
-    SerialEndpoint.getAllSensorsValues(sensorArr);
-
-    water_level_cm = sensorArr[0];
-    nutrient_level_cm = sensorArr[1];
-    ph_downer_level_cm = sensorArr[2];
-    ph_level = (sensorArr[3] / 100.00);
-    tds_level = (sensorArr[4] / 100.00);
+    uint16_t * sensoArrPtr = NULL;
+    if (!SerialEndpoint.getAllSensorsValues())
+    {
+      Serial.println("Getting sensors values : ERROR!");
+      return;
+    }
+    sensoArrPtr = SerialEndpoint.getSensorsArr();
+    Serial.println("Getting sensors values : OK!");
+    water_level_cm = (int)*(sensoArrPtr++);
+    nutrient_level_cm = (int)*(sensoArrPtr++);
+    ph_downer_level_cm = (int)*(sensoArrPtr++);
+    ph_level = (int)(*(sensoArrPtr++) / 100.00);
+    tds_level = (int)(*(sensoArrPtr++) / 100.00);
 }

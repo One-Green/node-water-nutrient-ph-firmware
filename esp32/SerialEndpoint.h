@@ -68,7 +68,9 @@ public:
   /* Attend Set PUMP State commands : validate if process is success */
   bool attendSetPumpStateRes(uint8_t pumpCommand, char * buffData);
 
-  bool getAllSensorsValues(uint16_t * sensorBuffer);
+  bool getAllSensorsValues();
+
+  uint16_t * getSensorsArr();
 
   /* Set Pump State. Return true when received value is equal to input state*/
   bool setPumpState(uint8_t pumpId, uint8_t state);

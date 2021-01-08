@@ -231,35 +231,35 @@ bool SerialEndpointClass::attendGetSensorValueRes(uint8_t sensorCommand, char * 
   if (sensorCommand == CMD_GET_WATER_LEVEL)
   {
     incomingSensorVal[0] = sensorVal;
-    DEBUG_PORT.print("Water Level : ");
+    DEBUG_PORT.print("RX -> Water Level : ");
     DEBUG_PORT.println(incomingSensorVal[0]);
     status = true;
   }
   else if (sensorCommand == CMD_GET_NUTRIENT_LEVEL)
   {
     incomingSensorVal[1] = sensorVal;
-    DEBUG_PORT.print("Nutrient Level : ");
-    DEBUG_PORT.println(incomingSensorVal[0]);
+    DEBUG_PORT.print("RX -> Nutrient Level : ");
+    DEBUG_PORT.println(incomingSensorVal[1]);
     status = true;
   }
   else if (sensorCommand == CMD_GET_PH_DOWNER_LEVEL)
   {
     incomingSensorVal[2] = sensorVal;
-    DEBUG_PORT.print("PH Downer Level : ");
+    DEBUG_PORT.print("RX -> PH Downer Level : ");
     DEBUG_PORT.println(incomingSensorVal[2]);
     status = true;
   }
   else if (sensorCommand == CMD_GET_TDS)
   {
     incomingSensorVal[3] = sensorVal;
-    DEBUG_PORT.print("TDS Value : ");
+    DEBUG_PORT.print("RX -> TDS Value : ");
     DEBUG_PORT.println((float)(incomingSensorVal[3] / 100.00));
     status = true;
   }
   else if (sensorCommand == CMD_GET_PH)
   {
     incomingSensorVal[4] = sensorVal;
-    DEBUG_PORT.print("PH Value : ");
+    DEBUG_PORT.print("RX -> PH Value : ");
     DEBUG_PORT.println((float)(incomingSensorVal[4] / 100.00));
     status = true;
   }
@@ -339,7 +339,7 @@ bool SerialEndpointClass::attendSetPumpStateRes(uint8_t pumpCommand, char * buff
   return status; 
 }
 
-bool SerialEndpointClass::getAllSensorsValues(uint16_t * sensorBuffer)
+bool SerialEndpointClass::getAllSensorsValues()
 {
   this->getSensorValueReq(CMD_GET_WATER_LEVEL);
   if (this->hadError()) return false; //maybe return false
@@ -359,10 +359,13 @@ bool SerialEndpointClass::getAllSensorsValues(uint16_t * sensorBuffer)
 
   this->getSensorValueReq(CMD_GET_PH);
   if (this->hadError()) return false; //maybe return false
-
-  sensorBuffer = incomingSensorVal;
   
   return true;
+}
+
+uint16_t * SerialEndpointClass::getSensorsArr()
+{
+  return incomingSensorVal;
 }
 
 bool SerialEndpointClass::setPumpState(uint8_t pumpId, uint8_t state)

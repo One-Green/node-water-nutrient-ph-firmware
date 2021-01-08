@@ -8,8 +8,8 @@
 #define BRIDGE_RESP_TIMEOUT_MS 700
 
 /* Serial Bridge Port, Baud and Pins Def */
-#define BRIDGE_TX_PIN TX
-#define BRIDGE_RX_PIN RX
+#define BRIDGE_TX_PIN GPIO17
+#define BRIDGE_RX_PIN GPIO16
 #define BRIDGE_PORT Serial2
 #define BRIDGE_BAUD 9600
 
