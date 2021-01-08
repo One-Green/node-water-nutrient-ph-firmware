@@ -1,5 +1,6 @@
 #include "SerialEndpoint.h"
 #include "OGIO.h"
+#define TEST //sensor values simulation for serial bridge test
 static SerialEndpointClass *self;
 static uint8_t recBuffer[SERIAL_BUFF_SIZE];
 
@@ -387,31 +388,51 @@ bool SerialEndpointClass::attendGetSensorValueReq(uint8_t sensorCommand)
   if (sensorCommand == CMD_GET_WATER_LEVEL)
   {
     //get water level
+    #ifdef TEST
+    sensorVal = 10;
+    #else
     sensorVal = io_handler.getWaterLevelCM();
+    #endif
     status = true;
   }
   else if (sensorCommand == CMD_GET_NUTRIENT_LEVEL)
   {
     //get nutrient level
+    #ifdef TEST
+    sensorVal = 20;
+    #else
     sensorVal = io_handler.getNutrientLevelCM();
+    #endif
     status = true;
   }
   else if (sensorCommand == CMD_GET_PH_DOWNER_LEVEL)
   {
     //get ph downer level
+    #ifdef TEST
+    sensorVal = 30;
+    #else
     sensorVal = io_handler.getPhDownerLevelCM();
+    #endif
     status = true;
   }
   else if (sensorCommand == CMD_GET_TDS)
   {
     //get tds val
+    #ifdef TEST
+    sensorVal = (uint16_t)(99.56 * 100.00);
+    #else
     sensorVal = (uint16_t)(io_handler.getTDS() * 100.00);
+    #endif
     status = true;
   }
   else if (sensorCommand == CMD_GET_PH)
   {
     //get ph val
+    #ifdef TEST
+    sensorVal = (uint16_t)(50.5 * 100.00);
+    #else
     sensorVal = (uint16_t)(io_handler.getPhLevel() * 100.00);
+    #endif
     status = true;
   }
   /* Send sensor value */
