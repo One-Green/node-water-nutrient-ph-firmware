@@ -364,6 +364,6 @@ void readAllMegaSensors()
     water_level_cm = (int)*(sensoArrPtr++);
     nutrient_level_cm = (int)*(sensoArrPtr++);
     ph_downer_level_cm = (int)*(sensoArrPtr++);
-    ph_level = (int)(*(sensoArrPtr++) / 100.00);
     tds_level = (int)(*(sensoArrPtr++) / 100.00);
+    ph_level = (int)(*(sensoArrPtr++) / 100.00);
 }
