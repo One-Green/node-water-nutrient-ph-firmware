@@ -15,9 +15,8 @@ int NutrientLevelEchoPin = 5;
 int pHDownerLevelTriggerPin = 6;
 int pHDownerLevelEchoPin = 7;
 
-int pHSense = A0;
-int tdsSensorPin = A1;
-
+#define pHSense A0
+#define TdsSensorPin A1
 // ----------------------------  // Actuators
 
 int WaterPumpPin = 22;
@@ -41,6 +40,8 @@ void OGIO::initR() {
     pinMode(phDownerPumpPin, OUTPUT);
     pinMode(MixerPumpPin, OUTPUT);
 
+    pinMode(pHSense, INPUT);
+    pinMode(TdsSensorPin, INPUT);
 }
 
 
@@ -76,22 +77,11 @@ float OGIO::getTDS() {
      *  source https://wiki.keyestudio.com/KS0429_keyestudio_TDS_Meter_V1.0
      *
      * */
-
-    // TODO clean sampling/ analog read stuff
-    int VREF = 5.0; // analog reference voltage(Volt) of the ADC
-    int SCOUNT = 30;
-    int analogBuffer[SCOUNT]; // store the analog value in the array, read from ADC
-    int analogBufferTemp[SCOUNT];
-    int analogBufferIndex = 0, copyIndex = 0;
-    float averageVoltage = 0;
-    float tdsValue = 0;
-    float temperature = 25;
     static unsigned long analogSampleTimepoint = millis();
-
     if (millis() - analogSampleTimepoint > 40U) //every 40 milliseconds,read the analog value from the ADC
     {
         analogSampleTimepoint = millis();
-        analogBuffer[analogBufferIndex] = analogRead(tdsSensorPin); //read the analog value and store into the buffer
+        analogBuffer[analogBufferIndex] = analogRead(TdsSensorPin); //read the analog value and store into the buffer
         analogBufferIndex++;
         if (analogBufferIndex == SCOUNT)
             analogBufferIndex = 0;
@@ -106,49 +96,48 @@ float OGIO::getTDS() {
         float compensationCoefficient = 1.0 + 0.02 * (temperature -
                                                       25.0); //temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
         float compensationVoltage = averageVoltage / compensationCoefficient; //temperature compensation
-        tdsValue = (
-                           133.42 * compensationVoltage * compensationVoltage * compensationVoltage -
-                           255.86 * compensationVoltage * compensationVoltage + 857.39 * compensationVoltage
-                   ) * 0.5; //convert voltage value to tds value
-
+        tdsValue = (133.42 * compensationVoltage * compensationVoltage * compensationVoltage -
+                    255.86 * compensationVoltage * compensationVoltage + 857.39 * compensationVoltage) *
+                   0.5; //convert voltage value to tds value
+                // Serial.print("TDS Value:");
+                // Serial.print(tdsValue, 0);
+                // Serial.println("ppm");
         return tdsValue;
     }
+
+
 }
 
-void OGIO::setWaterPump(uint8_t state)
-{
+void OGIO::setWaterPump(uint8_t state) {
     digitalWrite(WaterPumpPin, state);
 }
 
-void OGIO::setNutrientPump(uint8_t state)
-{
-    digitalWrite(NutrientPumpPin, state);    
+void OGIO::setNutrientPump(uint8_t state) {
+    digitalWrite(NutrientPumpPin, state);
 }
 
-void OGIO::setPHDownerPump(uint8_t state)
-{
+void OGIO::setPHDownerPump(uint8_t state) {
     digitalWrite(phDownerPumpPin, state);
 }
 
-void OGIO::setMixerPump(uint8_t state)
-{
+void OGIO::setMixerPump(uint8_t state) {
     digitalWrite(MixerPumpPin, state);
 }
 
 
-int OGIO::getWaterPumpStatus(){
+int OGIO::getWaterPumpStatus() {
     return digitalRead(WaterPumpPin);
 }
 
-int OGIO::getNutrientPumpStatus(){
+int OGIO::getNutrientPumpStatus() {
     return digitalRead(NutrientPumpPin);
 }
 
-int OGIO::getPhDownerPumpStatus(){
+int OGIO::getPhDownerPumpStatus() {
     return digitalRead(phDownerPumpPin);
 }
 
-int OGIO::getMixerPumpStatus(){
+int OGIO::getMixerPumpStatus() {
     return digitalRead(MixerPumpPin);
 }
 
@@ -194,4 +183,5 @@ int OGIO::baseUltrasonicReader(int trigger, int echo) {
     distance = duration * 0.034 / 2;
     return distance;
 }
+
 OGIO io_handler;
