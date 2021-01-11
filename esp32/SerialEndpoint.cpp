@@ -44,6 +44,7 @@ static void attendSerial(char *data, uint8_t size)
   // [command][data][crc][crc]
   // [command][crc][crc]
   // Attend
+  DEBUG_PORT.println("RX -> Callback called");
   if(size < 3) return self->sendNack(); // bad data
 
 
@@ -214,9 +215,6 @@ void SerialEndpointClass::setPumpStateReq(uint8_t pumpCommand, uint8_t state)
   case 4:
     pumpCommandFinal = CMD_SET_MIXER_PUMP_STATE;
     break;
-  default:
-    pumpCommandFinal = CMD_SET_WATER_PUMP_STATE;
-    break;
   }
   this->sendCommandValue8(pumpCommandFinal, state);
   this->waitForBufferResponse();
@@ -307,35 +305,36 @@ bool SerialEndpointClass::attendSetPumpStateRes(uint8_t pumpCommand, char * buff
 {
   bool status = false;
   uint8_t pumpState = buffData[1];
-  if (pumpCommand == CMD_GET_WATER_PUMP_STATE)
+  if (pumpCommand == CMD_SET_WATER_PUMP_STATE)
   {
     incomingPumpState[0] = pumpState;
-    DEBUG_PORT.print("Water Pump State - Confirmed : ");
+    DEBUG_PORT.print("RX -> Water Pump State - Confirmed : ");
     DEBUG_PORT.println(pumpState);
     status = true;
   }
-   else if (pumpCommand == CMD_GET_NUTRIENT_PUMP_STATE)
+   else if (pumpCommand == CMD_SET_NUTRIENT_PUMP_STATE)
   {
     incomingPumpState[1] = pumpState;
-    DEBUG_PORT.print("Nutrient Pump State - Confirmed : ");
+    DEBUG_PORT.print("RX -> Nutrient Pump State - Confirmed : ");
     DEBUG_PORT.println(pumpState);
     status = true;
   }
-   else if (pumpCommand == CMD_GET_PH_DOWNER_PUMP_STATE)
+   else if (pumpCommand == CMD_SET_DOWNER_PUMP_STATE)
   {
     incomingPumpState[2] = pumpState;
-    DEBUG_PORT.print("Downer Pump State - Confirmed : ");
+    DEBUG_PORT.print("RX -> Downer Pump State - Confirmed : ");
     DEBUG_PORT.println(pumpState);
     status = true;
   }
-   else if (pumpCommand == CMD_GET_MIXER_PUMP_STATE)
+   else if (pumpCommand == CMD_SET_MIXER_PUMP_STATE)
   {
     incomingPumpState[3] = pumpState;
-    DEBUG_PORT.print("Mixer Pump State - Confirmed : ");
+    DEBUG_PORT.print("RX -> Mixer Pump State - Confirmed : ");
     DEBUG_PORT.println(pumpState);
     status = true;
   }
   this->clearPendingErrorFlag();
+  BRIDGE_PORT.flush();
   return status; 
 }
 
@@ -371,8 +370,13 @@ uint16_t * SerialEndpointClass::getSensorsArr()
 bool SerialEndpointClass::setPumpState(uint8_t pumpId, uint8_t state)
 {
   this->setPumpStateReq(pumpId, state);
-  if (this->hadError()) return false;
-  return incomingPumpState[pumpId - 1] == state;
+  if (this->hadError())
+  {
+    Serial.println("Getting relay Status : ERROR");
+    return false;
+  }
+  Serial.println(incomingPumpState[pumpId - 1]);
+  return (incomingPumpState[pumpId - 1] == state);
 }
 #endif
 

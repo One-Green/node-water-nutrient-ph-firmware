@@ -78,11 +78,8 @@ static void attendSerial(char *data, uint8_t size)
   if (self->attendGetPumpStateReq(msgType)) return;
 
   //Attend Set Relay
-  if (self->attendSetPumpStateReq(msgType, data))
-  {
-    self->sendConfirmation();
-    return;
-  } 
+  if (self->attendSetPumpStateReq(msgType, data))return;
+   
   #endif
 }
 
@@ -479,28 +476,37 @@ bool SerialEndpointClass::attendSetPumpStateReq(uint8_t pumpCommand, char * buff
   if (pumpCommand == CMD_SET_WATER_PUMP_STATE)
   {
     //set water pump state
+    Serial.print("set water pump state : ");
+    Serial.println(pumpState);
     io_handler.setWaterPump(pumpState);
     status = true;
   }
    else if (pumpCommand == CMD_SET_NUTRIENT_PUMP_STATE)
   {
     //set nutrient pump state
+    Serial.print("set nutrient pump state : ");
+    Serial.println(pumpState);
     io_handler.setNutrientPump(pumpState);
     status = true;
   }
    else if (pumpCommand == CMD_SET_DOWNER_PUMP_STATE)
   {
     //set downer pump state
+    Serial.print("set downer pump state : ");
+    Serial.println(pumpState);    
     io_handler.setPHDownerPump(pumpState);
     status = true;
   }
    else if (pumpCommand == CMD_SET_MIXER_PUMP_STATE)
   {
     //set mixer pump state
+    Serial.print("set mixer pump state : ");
+    Serial.println(pumpState); 
     io_handler.setMixerPump(pumpState);
     status = true;
   }
   this->sendCommandValue8(pumpCommand, pumpState);
+  BRIDGE_PORT.flush();
   return status;
 }
 #endif
