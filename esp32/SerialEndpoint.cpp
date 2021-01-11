@@ -253,14 +253,14 @@ bool SerialEndpointClass::attendGetSensorValueRes(uint8_t sensorCommand, char * 
   {
     incomingSensorVal[3] = sensorVal;
     DEBUG_PORT.print("RX -> TDS Value : ");
-    DEBUG_PORT.println((float)(incomingSensorVal[3] / 100.00));
+    DEBUG_PORT.println((float)(incomingSensorVal[3]));
     status = true;
   }
   else if (sensorCommand == CMD_GET_PH)
   {
     incomingSensorVal[4] = sensorVal;
     DEBUG_PORT.print("RX -> PH Value : ");
-    DEBUG_PORT.println((float)(incomingSensorVal[4] / 100.00));
+    DEBUG_PORT.println((float)(incomingSensorVal[4]));
     status = true;
   }
   this->clearPendingErrorFlag();

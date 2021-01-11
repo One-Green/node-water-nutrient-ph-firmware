@@ -419,9 +419,9 @@ bool SerialEndpointClass::attendGetSensorValueReq(uint8_t sensorCommand)
   {
     //get tds val
     #ifdef TEST
-    sensorVal = (uint16_t)(99.56 * 100.00);
+    sensorVal = (uint16_t)(99.56);
     #else
-    sensorVal = (uint16_t)(io_handler.getTDS() * 100.00);
+    sensorVal = (uint16_t)(io_handler.getTDS());
     #endif
     status = true;
   }
@@ -429,9 +429,9 @@ bool SerialEndpointClass::attendGetSensorValueReq(uint8_t sensorCommand)
   {
     //get ph val
     #ifdef TEST
-    sensorVal = (uint16_t)(50.5 * 100.00);
+    sensorVal = (uint16_t)(50.5);
     #else
-    sensorVal = (uint16_t)(io_handler.getPhLevel() * 100.00);
+    sensorVal = (uint16_t)(io_handler.getPhLevel());
     #endif
     status = true;
   }
