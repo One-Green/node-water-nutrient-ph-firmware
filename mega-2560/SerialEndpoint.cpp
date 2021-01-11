@@ -1,6 +1,6 @@
 #include "SerialEndpoint.h"
 #include "OGIO.h"
-#define TEST //sensor values simulation for serial bridge test
+// #define TEST //sensor values simulation for serial bridge test
 static SerialEndpointClass *self;
 static uint8_t recBuffer[SERIAL_BUFF_SIZE];
 
