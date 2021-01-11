@@ -236,39 +236,65 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
     // TODO : add actuator flow below
     if (tag != NODE_TAG) return;
     
+    unsigned long timeoutCount = millis();
+    bool setPumpState = false;
+    bool showMessage = true;
+
     // Handle water pump
     if (ctl_water_pump != last_water_pump_state) {
         last_water_pump_state = ctl_water_pump;
         if (ctl_water_pump) //turn-ON and confirm 
         { 
-            while(!SerialEndpoint.setPumpState(WATER_PUMP_ID, 1)) //maybe add timeout
+            while ( (millis() - timeoutCount < 3000 ) && !setPumpState)
             {
-                Serial.println("[I/O] Waiting for water pump activation");
+                setPumpState = SerialEndpoint.setPumpState(WATER_PUMP_ID, 1);
+                if (showMessage)Serial.println("[I/O] Waiting for water pump activation");
+                showMessage = false;
+                delay(500);
             }
             Serial.println("[I/O] Water pump is OPENED");
         } 
         else //turn-OFF and confirm 
         {
-            while (!SerialEndpoint.setPumpState(WATER_PUMP_ID, 0)) //maybe add timeout
+            timeoutCount = millis();
+            setPumpState = false;
+            showMessage = true;
+            while ((millis() - timeoutCount < 3000 ) && !setPumpState) 
             {
-                Serial.println("[I/O] Waiting for water pump closing");
+                setPumpState = SerialEndpoint.setPumpState(WATER_PUMP_ID, 0);
+                if (showMessage)Serial.println("[I/O] Waiting for water pump closing");
+                showMessage = false;
+                delay(500);
             }
             Serial.println("[I/O] Water pump is CLOSED");
         }
     }
+    
     // handle nutrient pump
     if (ctl_nutrient_pump != last_nutrient_pump_state) {
         last_nutrient_pump_state = ctl_nutrient_pump;
         if (ctl_nutrient_pump) {
-            while (!SerialEndpoint.setPumpState(NUTRIENT_PUMP_ID, 1)) //maybe add timeout
+            timeoutCount = millis();
+            setPumpState = false;
+            showMessage = true;
+            while ((millis() - timeoutCount < 3000 ) && !setPumpState)
             {
-                Serial.println("[I/O] Waiting for nutrient pump activation");
+                setPumpState = SerialEndpoint.setPumpState(NUTRIENT_PUMP_ID, 1); 
+                if (showMessage)Serial.println("[I/O] Waiting for nutrient pump activation");
+                showMessage = false;
+                delay(500);
             }
             Serial.println("[I/O] Nutrient pump is OPENED");
         } else {
-            while (!SerialEndpoint.setPumpState(NUTRIENT_PUMP_ID, 0)) //maybe add timeout
+            timeoutCount = millis();
+            setPumpState = false;
+            showMessage = true;
+            while ((millis() - timeoutCount < 3000 ) && !setPumpState)
             {
-                Serial.println("[I/O] Waiting for nutrient pump closing");
+                setPumpState = SerialEndpoint.setPumpState(NUTRIENT_PUMP_ID, 0);
+                if (showMessage)Serial.println("[I/O] Waiting for nutrient pump closing");
+                showMessage = false;
+                delay(500);
             }
             Serial.println("[I/O] Nutrient pump is CLOSED");
         }
@@ -281,17 +307,29 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
 
         if (ctl_ph_downer_pump) 
         {
-            while (!SerialEndpoint.setPumpState(PH_DOWNER_PUMP_ID, 1)) //maybe add timeout
+            timeoutCount = millis();
+            setPumpState = false;
+            showMessage = true;
+            while ((millis() - timeoutCount < 3000 ) && !setPumpState)
             {
-                Serial.println("[I/O] Waiting for pH downer pump activation");
+                setPumpState = SerialEndpoint.setPumpState(PH_DOWNER_PUMP_ID, 1);
+                if (showMessage) Serial.println("[I/O] Waiting for pH downer pump activation");
+                showMessage = false;
+                delay(500);
             }
             Serial.println("[I/O] pH downer pump is OPENED");
         } 
         else
         {
-            while (!SerialEndpoint.setPumpState(PH_DOWNER_PUMP_ID, 0)) //maybe add timeout
+            timeoutCount = millis();
+            setPumpState = false;
+            showMessage = true;
+            while ((millis() - timeoutCount < 3000 ) && !setPumpState)
             {
-                Serial.println("[I/O] Waiting for pH downer pump closing");
+                setPumpState = SerialEndpoint.setPumpState(PH_DOWNER_PUMP_ID, 0);
+                if (showMessage) Serial.println("[I/O] Waiting for pH downer pump closing");
+                showMessage = false;
+                delay(500);
             }
             Serial.println("[I/O] pH downer pump is CLOSED");
         }
@@ -304,17 +342,29 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
 
         if (ctl_mixer_pump)
         {
-            while (!SerialEndpoint.setPumpState(MIXER_PUMP_ID, 1)) //maybe add timeout
+            timeoutCount = millis();
+            setPumpState = false;
+            showMessage = true;
+            while ((millis() - timeoutCount < 3000 ) && !setPumpState) 
             {
-                Serial.println("[I/O] Waiting for mixer pump activation");
+                setPumpState = SerialEndpoint.setPumpState(MIXER_PUMP_ID, 1)
+                if (showMessage)Serial.println("[I/O] Waiting for mixer pump activation");
+                showMessage = false;
+                delay(500);
             }
             Serial.println("[I/O] mixer pump is OPENED");
         }
         else
         {
-            while (!SerialEndpoint.setPumpState(MIXER_PUMP_ID, 0)) //maybe add timeout
+            timeoutCount = millis();
+            setPumpState = false;
+            showMessage = true;
+            while ((millis() - timeoutCount < 3000 ) && !setPumpState)
             {
-                Serial.println("[I/O] Waiting for mixer pump closing");
+                setPumpState = SerialEndpoint.setPumpState(MIXER_PUMP_ID, 0)
+                if (showMessage)Serial.println("[I/O] Waiting for mixer pump closing");
+                showMessage = false;
+                delay(500);
             }
             Serial.println("[I/O] mixer pump is CLOSED");
         }
