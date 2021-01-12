@@ -48,31 +48,6 @@ public:
   void sendAck();
   void sendNack();
 
-  // Master Device API Methods
-  #ifdef DEVICE_MASTER
-  /* Get Sensor Value*/
-  void getSensorValueReq(uint8_t sensorCommand);
-
-  /* Get Pump State */
-  void getPumpStateReq(uint8_t pumpCommand);
-
-  /* Set Pump State */
-  void setPumpStateReq(uint8_t pumpCommand, uint8_t state);
-
-  /* Attend get sensor value commands : get sensor values */
-  bool attendGetSensorValueRes(uint8_t sensorCommand, char * buffData);
-
-  /* Attend get pump state commands : get relay state */
-  bool attendGetPumpStateRes(uint8_t pumpCommand, char * buffData);
-
-  /* Attend Set PUMP State commands : validate if process is success */
-  bool attendSetPumpStateRes(uint8_t pumpCommand, char * buffData);
-
-  bool getAllSensorsValues(uint16_t * sensorBuffer);
-
-  /* Set Pump State. Return true when received value is equal to input state*/
-  bool setPumpState(uint8_t pumpId, uint8_t state);
-  #endif
   // Slave Device API Methods
 
   #ifdef DEVICE_SLAVE
