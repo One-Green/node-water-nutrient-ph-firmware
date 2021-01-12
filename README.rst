@@ -1,6 +1,8 @@
 One-Green node Water+Nutrient+phDowner firmware
 ===============================================
 
+Special Thanks to contributors :
+    - @MarcoCiau: ESP32 <-> Mega2560 Serial communication
 
 Water supplier for sprinkler node, including:
     - tank, nutrient, pH downer level
@@ -28,5 +30,3 @@ Arduino/C++ Library for Mega 2560 Board:
     - https://github.com/bblanchon/ArduinoJson (Available on Arduino IDE Package manager)
     - https://github.com/ivanseidel/ArduinoThread (Available on Arduino IDE Package manager)
 
-Special Thanks to:
-    - @nickgammon : http://www.gammon.com.au/forum/?id=10896 I2C communication tutorial
