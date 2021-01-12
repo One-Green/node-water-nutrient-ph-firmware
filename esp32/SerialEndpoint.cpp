@@ -62,9 +62,6 @@ static void attendSerial(char *data, uint8_t size)
   //Attend get sensor value commands response
   if (self->attendGetSensorValueRes(msgType, data)) return;
 
-  //Attend get pump status commands reponse
-  if (self->attendGetPumpStateRes(msgType, data)) return;
-
   //Attend set pump status commands reponse
   if (self->attendSetPumpStateRes(msgType, data)) return;
   #endif
@@ -243,42 +240,6 @@ bool SerialEndpointClass::attendGetSensorValueRes(uint8_t sensorCommand, char * 
     incomingSensorVal[4] = sensorVal;
     DEBUG_PORT.print("RX -> PH Value : ");
     DEBUG_PORT.println((float)(incomingSensorVal[4]));
-    status = true;
-  }
-  this->clearPendingErrorFlag();
-  return status;
-}
-
-bool SerialEndpointClass::attendGetPumpStateRes(uint8_t pumpCommand, char * buffData)
-{
-  bool status = false;
-  uint8_t pumpState = buffData[1];
-  if (pumpCommand == CMD_GET_WATER_PUMP_STATE)
-  {
-    //TODO: process water pump state
-    DEBUG_PORT.print("Water Pump State : ");
-    DEBUG_PORT.println(pumpState);
-    status = true;
-  }
-   else if (pumpCommand == CMD_GET_NUTRIENT_PUMP_STATE)
-  {
-    //TODO: process nutrient pump state
-    DEBUG_PORT.print("Nutrient Pump State : ");
-    DEBUG_PORT.println(pumpState);
-    status = true;
-  }
-   else if (pumpCommand == CMD_GET_PH_DOWNER_PUMP_STATE)
-  {
-    //TODO: process downer pump state
-    DEBUG_PORT.print("Downer Pump State : ");
-    DEBUG_PORT.println(pumpState);
-    status = true;
-  }
-   else if (pumpCommand == CMD_GET_MIXER_PUMP_STATE)
-  {
-    //TODO: process mixer pump state
-    DEBUG_PORT.print("Mixer Pump State : ");
-    DEBUG_PORT.println(pumpState);
     status = true;
   }
   this->clearPendingErrorFlag();
