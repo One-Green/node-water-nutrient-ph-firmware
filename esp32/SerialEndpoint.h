@@ -75,22 +75,7 @@ public:
   /* Set Pump State. Return true when received value is equal to input state*/
   bool setPumpState(uint8_t pumpId, uint8_t state);
   #endif
-  // Slave Device API Methods
-
-  #ifdef DEVICE_SLAVE
-  /* Send process confirmation */
-  void sendConfirmation();
-
-  /* Attend Get Sensor commands */
-  bool attendGetSensorValueReq(uint8_t sensorCommand);
-
-  /* Attend Get PUMP State commands */
-  bool attendGetPumpStateReq(uint8_t pumpCommand);
-
-  /* Attend Set PUMP State commands */
-  bool attendSetPumpStateReq(uint8_t pumpCommand, char * buffData);
-  #endif
-
+  
   /**
    * Check if an error is ocurred trough Serial Bridge.
    * @param none.

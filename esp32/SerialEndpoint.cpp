@@ -68,22 +68,6 @@ static void attendSerial(char *data, uint8_t size)
   //Attend set pump status commands reponse
   if (self->attendSetPumpStateRes(msgType, data)) return;
   #endif
-
-  //Slave Device Commands Attends
-  #ifdef DEVICE_SLAVE
-  //Attend Sensor Readings
-  if (self->attendGetSensorValueReq(msgType)) return;
-
-  //Attend Get Relay
-  if (self->attendGetPumpStateReq(msgType)) return;
-
-  //Attend Set Relay
-  if (self->attendSetPumpStateReq(msgType, data))
-  {
-    self->sendConfirmation();
-    return;
-  } 
-  #endif
 }
 
 SerialEndpointClass::SerialEndpointClass()
@@ -377,104 +361,6 @@ bool SerialEndpointClass::setPumpState(uint8_t pumpId, uint8_t state)
   }
   Serial.println(incomingPumpState[pumpId - 1]);
   return (incomingPumpState[pumpId - 1] == state);
-}
-#endif
-
-// Slave Device API Methods
-#ifdef DEVICE_SLAVE
-void SerialEndpointClass::sendConfirmation()
-{
-  this->sendNack();
-}
-
-bool SerialEndpointClass::attendGetSensorValueReq(uint8_t sensorCommand)
-{
-  bool status = false;
-  uint16_t sensorVal = 0;
-  if (sensorCommand == CMD_GET_WATER_LEVEL)
-  {
-    //TODO: get water level
-    status = true;
-  }
-  else if (sensorCommand == CMD_GET_NUTRIENT_LEVEL)
-  {
-    //TODO: get nutrient level
-    status = true;
-  }
-  else if (sensorCommand == CMD_GET_PH_DOWNER_LEVEL)
-  {
-    //TODO: get ph downer level
-    status = true;
-  }
-  else if (sensorCommand == CMD_GET_TDS)
-  {
-    //TODO: get tds val
-    status = true;
-  }
-  else if (sensorCommand == CMD_GET_PH)
-  {
-    //TODO: get ph val
-    status = true;
-  }
-  /* Send sensor value */
-  this->sendCommandValue16(sensorCommand, sensorVal);
-  return status;
-}
-
-bool SerialEndpointClass::attendGetPumpStateReq(uint8_t pumpCommand)
-{
-  bool status = false;
-  uint8_t pumpState = 0;
-  if (pumpCommand == CMD_GET_WATER_PUMP_STATE)
-  {
-    //TODO: get water pump state
-    status = true;
-  }
-   else if (pumpCommand == CMD_GET_NUTRIENT_PUMP_STATE)
-  {
-    //TODO: get nutrient pump state
-    status = true;
-  }
-   else if (pumpCommand == CMD_GET_PH_DOWNER_PUMP_STATE)
-  {
-    //TODO: get downer pump state
-    status = true;
-  }
-   else if (pumpCommand == CMD_GET_MIXER_PUMP_STATE)
-  {
-    //TODO: get mixer pump state
-    status = true;
-  }
-  this->sendCommand8(pumpCommand, pumpState);
-  return status;  
-}
-
-bool SerialEndpointClass::attendSetPumpStateReq(uint8_t pumpCommand, char * buffData)
-{
-  bool status = false;
-  uint8_t pumpState = buffData[1];
-  if (pumpCommand == CMD_SET_WATER_PUMP_STATE)
-  {
-    //TODO: set water pump state
-    status = true;
-  }
-   else if (pumpCommand == CMD_SET_NUTRIENT_PUMP_STATE)
-  {
-    //TODO: set nutrient pump state
-    status = true;
-  }
-   else if (pumpCommand == CMD_SET_DOWNER_PUMP_STATE)
-  {
-    //TODO: set downer pump state
-    status = true;
-  }
-   else if (pumpCommand == CMD_SET_MIXER_PUMP_STATE)
-  {
-    //TODO: set mixer pump state
-    status = true;
-  }
-  this->sendCommand8(pumpCommand, pumpState);
-  return status;
 }
 #endif
 
