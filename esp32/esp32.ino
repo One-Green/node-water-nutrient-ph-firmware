@@ -46,7 +46,9 @@ int MQTT_PORT = 30180;
 char *SENSOR_TOPIC = "water/sensor";
 char *SENSOR_CONTROLLER = "water/controller";
 unsigned long pubSensorTimer;
-const int sensorPubRateSec = 10; //send sensor values each 10 sec
+unsigned long subControllerTimer =  millis();
+const int sensorPubRateSec = 5; //send sensor values each 10 sec
+const int safetyCloseActuatorSec = 6; //close actuators if no response from Master
 
 // Parameter from Master, provided by MQTT JSON
 bool ctl_water_pump = false;
@@ -123,6 +125,16 @@ void loop() {
     client.loop();
 
     SerialEndpoint.loop();
+
+    if (client.connected() && (millis() - subControllerTimer > (safetyCloseActuatorSec * 1000)))
+    {
+        Serial.println("[MQTT] Warning callback time reached: switch OFF all actuators");
+        SerialEndpoint.setPumpState(WATER_PUMP_ID, 0);
+        SerialEndpoint.setPumpState(NUTRIENT_PUMP_ID, 0);
+        SerialEndpoint.setPumpState(PH_DOWNER_PUMP_ID, 0);
+        SerialEndpoint.setPumpState(MIXER_PUMP_ID, 0);
+        Serial.println("[MQTT] all actuators OFF");
+    }
     
     //Pub sensors every 10 secs and only if the client is connected
     if (client.connected() && (millis() - pubSensorTimer > (sensorPubRateSec * 1000)))
@@ -198,6 +210,8 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
      * and parse to Arduino datatype
      *
      * */
+
+    subControllerTimer = millis();
     Serial.print("[MQTT] Receiving << on topic: ");
     Serial.print(topic);
     Serial.print(". JSON message: ");
