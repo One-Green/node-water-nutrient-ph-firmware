@@ -2,7 +2,9 @@ One-Green node Water+Nutrient+phDowner firmware
 ===============================================
 
 Special Thanks to contributors :
-    - @MarcoCiau: ESP32 <-> Mega2560 Serial communication
+    - MarcoCiau_: ESP32 <-> Mega2560 Serial communication
+
+.. _MarcoCiau: https://github.com/MarcoCiau
 
 Water supplier for sprinkler node, including:
     - tank, nutrient, pH downer level
