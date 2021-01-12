@@ -44,7 +44,6 @@ static void attendSerial(char *data, uint8_t size)
   // [command][data][crc][crc]
   // [command][crc][crc]
   // Attend
-  DEBUG_PORT.println("RX -> Callback called");
   if(size < 3) return self->sendNack(); // bad data
 
 

@@ -347,7 +347,7 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
             showMessage = true;
             while ((millis() - timeoutCount < 3000 ) && !setPumpState) 
             {
-                setPumpState = SerialEndpoint.setPumpState(MIXER_PUMP_ID, 1)
+                setPumpState = SerialEndpoint.setPumpState(MIXER_PUMP_ID, 1);
                 if (showMessage)Serial.println("[I/O] Waiting for mixer pump activation");
                 showMessage = false;
                 delay(500);
@@ -361,7 +361,7 @@ void mqttCallback(char *topic, byte *message, unsigned int length) {
             showMessage = true;
             while ((millis() - timeoutCount < 3000 ) && !setPumpState)
             {
-                setPumpState = SerialEndpoint.setPumpState(MIXER_PUMP_ID, 0)
+                setPumpState = SerialEndpoint.setPumpState(MIXER_PUMP_ID, 0);
                 if (showMessage)Serial.println("[I/O] Waiting for mixer pump closing");
                 showMessage = false;
                 delay(500);

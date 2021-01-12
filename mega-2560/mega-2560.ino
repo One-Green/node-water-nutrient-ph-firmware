@@ -17,11 +17,6 @@
 #include "SerialBridgeConf.h"
 #include "SerialEndpoint.h"
 
-#define RXD10 10
-#define TXD11 11
-
-SoftwareSerial EXSerial(RXD10, TXD11);  // Rx, Tx
-
 void setup() 
 {
     Serial.begin(9600);                   // Debug Serial communication
