@@ -36,9 +36,16 @@ void OGIO::initR() {
     pinMode(pHDownerLevelEchoPin, INPUT);
 
     pinMode(WaterPumpPin, OUTPUT);
+    digitalWrite(WaterPumpPin, LOW);
+
     pinMode(NutrientPumpPin, OUTPUT);
+    digitalWrite(NutrientPumpPin, LOW);
+
     pinMode(phDownerPumpPin, OUTPUT);
+    digitalWrite(phDownerPumpPin, LOW);
+
     pinMode(MixerPumpPin, OUTPUT);
+    digitalWrite(MixerPumpPin, LOW);
 
     pinMode(pHSense, INPUT);
     pinMode(TdsSensorPin, INPUT);
